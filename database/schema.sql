@@ -1,0 +1,1 @@
+-- Agreed MySQL schema (Week 1)
