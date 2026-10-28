@@ -1,15 +1,15 @@
 -- Agreed MySQL schema (Week 1)
 -- =====================================================================
--- ServiceLink : Complete MySQL 8.0+ Database Schema
+-- WedaLink : Complete MySQL 8.0+ Database Schema
 -- Engine: InnoDB | Charset: utf8mb4
 -- Tables are created in dependency order.
 -- =====================================================================
 
-CREATE DATABASE IF NOT EXISTS servicelink
+CREATE DATABASE IF NOT EXISTS WedaLink
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE servicelink;
+USE WedaLink;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
