@@ -9,17 +9,19 @@ from pwdlib import PasswordHash
 # Password hashing configuration
 password_hash = PasswordHash.recommended()
 
-
-# JWT configuration
+# Load backend/.env
 ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 load_dotenv(ENV_FILE)
-# if not JWT_SECRET_KEY:
-#     raise RuntimeError(
-#         "JWT_SECRET_KEY is not configured. "
-#         "Set it in your environment before starting the application."
-#     )
 
+# JWT configuration
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not JWT_SECRET_KEY:
+    raise RuntimeError(
+        "JWT_SECRET_KEY is not configured. "
+        "Set it in your environment before starting the application."
+    )
+    
 
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = int(
