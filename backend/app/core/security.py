@@ -1,23 +1,25 @@
 import os
+import jwt
+from pathlib import Path
+from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from typing import Any
-
-import jwt
 from pwdlib import PasswordHash
-
 
 # Password hashing configuration
 password_hash = PasswordHash.recommended()
 
 
 # JWT configuration
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(ENV_FILE)
+# if not JWT_SECRET_KEY:
+#     raise RuntimeError(
+#         "JWT_SECRET_KEY is not configured. "
+#         "Set it in your environment before starting the application."
+#     )
 
-if not JWT_SECRET_KEY:
-    raise RuntimeError(
-        "JWT_SECRET_KEY is not configured. "
-        "Set it in your environment before starting the application."
-    )
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = int(
