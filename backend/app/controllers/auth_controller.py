@@ -1,10 +1,12 @@
 
 from sqlalchemy.orm import Session
+from app.models.user import User
 
 from app.schemas.auth_schema import (
     RegisterRequest,
     LoginRequest,
     AuthResponse,
+    UserResponse
 )
 from app.services.auth_service import (
     register_user,
@@ -36,3 +38,7 @@ def login_controller(
         db=db,
         login_data=login_data,
     )
+
+def get_me_controller(current_user: User) -> UserResponse:
+    """Return the authenticated user's public details."""
+    return UserResponse.model_validate(current_user)
