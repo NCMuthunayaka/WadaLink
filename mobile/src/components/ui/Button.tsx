@@ -1,91 +1,68 @@
 import React from 'react';
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
   ActivityIndicator,
-  type ViewStyle,
+  Pressable,
+  StyleSheet,
+  type StyleProp,
   type TextStyle,
+  type ViewStyle,
 } from 'react-native';
-import { colors, fontSize, fontWeight, radius, spacing } from '../../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import Icon, { type IconName } from '@/components/ui/Icon';
+import Text from '@/components/ui/Text';
+import { colors, gradients, radius, sizes, spacing } from '@/constants/theme';
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-type Size = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'ai';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
   label: string;
   onPress: () => void;
-  variant?: Variant;
-  size?: Size;
-  icon?: string;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: IconName;
+  trailingIcon?: IconName;
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   fullWidth?: boolean;
 }
 
-const variantStyles: Record<Variant, { container: ViewStyle; text: TextStyle }> = {
-  primary: {
-    container: { backgroundColor: colors.primary },
-    text: { color: colors.textInverse },
-  },
-  secondary: {
-    container: { backgroundColor: colors.primaryLight },
-    text: { color: colors.primary },
-  },
+const variantStyles: Record<ButtonVariant, { container: ViewStyle; color: string }> = {
+  primary: { container: { backgroundColor: colors.primary }, color: colors.onPrimary },
+  secondary: { container: { backgroundColor: colors.primaryLight }, color: colors.primary },
   outline: {
     container: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.border },
-    text: { color: colors.textSecondary },
+    color: colors.textSecondary,
   },
-  ghost: {
-    container: { backgroundColor: 'transparent' },
-    text: { color: colors.primary },
-  },
-  danger: {
-    container: { backgroundColor: colors.dangerLight },
-    text: { color: colors.danger },
-  },
+  ghost: { container: { backgroundColor: 'transparent' }, color: colors.primary },
+  danger: { container: { backgroundColor: colors.dangerLight }, color: colors.danger },
+  // AI Assist: gradient is drawn behind the content, AI features only
+  ai: { container: { overflow: 'hidden' }, color: colors.onPrimary },
 };
 
-const sizeStyles: Record<Size, { container: ViewStyle; text: TextStyle }> = {
+// lg = main CTA (48px), md = card actions (40px), sm = inline actions (32px)
+const sizeStyles: Record<
+  ButtonSize,
+  { container: ViewStyle; iconSize: number; text: 'labelMd' | 'labelLg' }
+> = {
   sm: {
-    container: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, borderRadius: radius.sm },
-    text: { fontSize: fontSize.sm },
+    container: { minHeight: 32, paddingHorizontal: spacing.md, borderRadius: radius.sm },
+    iconSize: 16,
+    text: 'labelMd',
   },
   md: {
-    container: { paddingHorizontal: spacing.base, paddingVertical: spacing.sm + 2, borderRadius: radius.md },
-    text: { fontSize: fontSize.base },
+    container: { minHeight: sizes.buttonCompact, paddingHorizontal: spacing.base, borderRadius: radius.md },
+    iconSize: 18,
+    text: 'labelLg',
   },
   lg: {
-    container: { paddingHorizontal: spacing.xl, paddingVertical: spacing.md, borderRadius: radius.md },
-    text: { fontSize: fontSize.lg },
+    container: { minHeight: sizes.button, paddingHorizontal: spacing.xl, borderRadius: radius.md },
+    iconSize: 20,
+    text: 'labelLg',
   },
 };
-
-// FIX 1: styles defined before the component so the reference order is explicit
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  baseText: {
-    // FIX 5: added default fontSize so Android doesn't silently drop the style
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-  },
-  // FIX 4: cast width as a number-safe value via flex rather than '100%' string
-  fullWidth: {
-    alignSelf: 'stretch' as const,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  iconText: {
-    marginRight: 6,
-  },
-});
 
 export default function Button({
   label,
@@ -93,6 +70,7 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   icon,
+  trailingIcon,
   loading = false,
   disabled = false,
   style,
@@ -104,38 +82,57 @@ export default function Button({
   const isDisabled = disabled || loading;
 
   return (
-    <TouchableOpacity
-      // FIX 2: guard onPress so it never fires when disabled
-      onPress={isDisabled ? undefined : onPress}
+    <Pressable
+      onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.75}
-      style={[
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      style={({ pressed }) => [
         styles.base,
         v.container,
         s.container,
         fullWidth && styles.fullWidth,
+        pressed && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === 'primary' ? colors.textInverse : colors.primary}
+      {variant === 'ai' ? (
+        <LinearGradient
+          colors={gradients.ai.colors}
+          start={gradients.ai.start}
+          end={gradients.ai.end}
+          style={StyleSheet.absoluteFill}
         />
+      ) : null}
+
+      {loading ? (
+        <ActivityIndicator size="small" color={v.color} />
       ) : (
-        // FIX 3: icon and label rendered as separate <Text> nodes for independent styling
         <>
-          {icon && (
-            <Text style={[styles.baseText, v.text, s.text, styles.iconText, textStyle]}>
-              {icon}
-            </Text>
-          )}
-          <Text style={[styles.baseText, v.text, s.text, textStyle]}>
+          {icon ? <Icon name={icon} size={s.iconSize} color={v.color} style={styles.iconLeft} /> : null}
+          <Text variant={s.text} color={v.color} style={textStyle}>
             {label}
           </Text>
+          {trailingIcon ? (
+            <Icon name={trailingIcon} size={s.iconSize} color={v.color} style={styles.iconRight} />
+          ) : null}
         </>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullWidth: { alignSelf: 'stretch' },
+  pressed: { opacity: 0.9, transform: [{ scale: 0.98 }] },
+  disabled: { opacity: 0.5 },
+  iconLeft: { marginRight: 6 },
+  iconRight: { marginLeft: 6 },
+});
