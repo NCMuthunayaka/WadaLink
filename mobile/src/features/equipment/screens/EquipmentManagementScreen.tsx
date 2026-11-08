@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -19,6 +18,7 @@ import {
   updateEquipmentStatus,
 } from '../../../store/equipmentSlice';
 import type { RootState } from '../../../store/store';
+import Text from '@/components/ui/Text';
 import { colors, fontSize, fontWeight, radius, spacing, shadow } from '../../../constants/theme';
 import StatsRow from '../components/StatsRow';
 import FilterTabs from '../components/FilterTabs';
@@ -104,7 +104,7 @@ export default function EquipmentManagementScreen() {
       <View style={styles.ctaWrapper}>
         <Button
           label="Add New Equipment"
-          icon="⊕"
+          icon="add-circle-outline"
           onPress={handleAddEquipment}
           variant="primary"
           size="lg"
