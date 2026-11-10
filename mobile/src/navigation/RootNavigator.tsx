@@ -7,7 +7,7 @@ import type { RootStackParamList } from '@/navigation/types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Temporary: open the UI kit preview first. Set to false once Step 3 is checked.
-const SHOW_UI_KIT = true;
+const SHOW_UI_KIT = false;
 
 export default function RootNavigator() {
   return (
