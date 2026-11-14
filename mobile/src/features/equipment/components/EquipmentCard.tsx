@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import {
   shadow,
   spacing,
 } from '../../../constants/theme';
+import Text from '@/components/ui/Text';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import Button from '../../../components/ui/Button';
 import type { Equipment } from '../../../types/equipment';
@@ -159,7 +159,7 @@ export default function EquipmentCard({
           <>
             <Button
               label="Manage Rental"
-              icon="☰"
+              icon="tune"
               onPress={() => onManageRental?.(id)}
               variant="secondary"
               size="sm"
@@ -167,7 +167,7 @@ export default function EquipmentCard({
             />
             <Button
               label="View Contract"
-              icon="📄"
+              icon="description"
               onPress={() => onViewContract?.(id)}
               variant="outline"
               size="sm"
@@ -180,7 +180,7 @@ export default function EquipmentCard({
           <>
             <Button
               label="Edit Listing"
-              icon="✏"
+              icon="edit"
               onPress={() => onEditListing?.(id)}
               variant="outline"
               size="sm"
@@ -188,7 +188,7 @@ export default function EquipmentCard({
             />
             <Button
               label="Pause Listing"
-              icon="⏸"
+              icon="pause-circle-outline"
               onPress={() => onPauseListing?.(id)}
               variant="outline"
               size="sm"
@@ -200,7 +200,7 @@ export default function EquipmentCard({
         {status === 'return_pending' && (
           <Button
             label="Inspect & Check In"
-            icon="🔍"
+            icon="fact-check"
             onPress={() => onCheckIn?.(id)}
             variant="primary"
             size="sm"
@@ -213,7 +213,7 @@ export default function EquipmentCard({
           <>
             <Button
               label="Edit Listing"
-              icon="✏"
+              icon="edit"
               onPress={() => onEditListing?.(id)}
               variant="outline"
               size="sm"
@@ -221,7 +221,7 @@ export default function EquipmentCard({
             />
             <Button
               label="Bookings"
-              icon="📅"
+              icon="event"
               onPress={() => onBookings?.(id)}
               variant="outline"
               size="sm"
