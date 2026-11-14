@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, fontSize, fontWeight, radius, spacing } from '../../../constants/theme';
 import type { FilterCount, FilterTab } from '../../../types/equipment';
+import Text from '@/components/ui/Text';
 
 interface FilterTabsProps {
   tabs: FilterCount[];

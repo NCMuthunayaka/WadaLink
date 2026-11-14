@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { colors, fontSize, fontWeight, radius, spacing, shadow } from '../../../constants/theme';
 import type { EquipmentStats } from '../../../types/equipment';
+import Text from '@/components/ui/Text';
 
 interface StatsRowProps {
   stats: EquipmentStats;

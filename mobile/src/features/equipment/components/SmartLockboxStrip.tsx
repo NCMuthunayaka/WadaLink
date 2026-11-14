@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, fontSize, fontWeight, spacing } from '../../../constants/theme';
+import Text from '@/components/ui/Text';
 
 interface SmartLockboxStripProps {
   lockboxId?: string;
