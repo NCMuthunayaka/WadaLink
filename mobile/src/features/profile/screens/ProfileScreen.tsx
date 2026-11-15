@@ -33,7 +33,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
-        <Avatar name={user.name} size={72} verified={user.providerProfile?.approvalStatus === 'approved'} />
+        <Avatar name={user.name} size={72} />
         <Text variant="headlineSm" style={styles.name}>
           {user.name}
         </Text>
@@ -43,11 +43,6 @@ export default function ProfileScreen() {
         <Text variant="labelMd" color={colors.primary} style={styles.role}>
           {ROLE_LABELS[user.role]}
         </Text>
-        {user.providerProfile?.businessName ? (
-          <Text variant="bodySm" color={colors.textMuted}>
-            {user.providerProfile.businessName}
-          </Text>
-        ) : null}
       </Card>
 
       <Button label="Sign out" variant="outline" size="lg" fullWidth icon="logout" onPress={confirmSignOut} />

@@ -12,7 +12,6 @@ export type RootStackParamList = {
   // Signed in (which one appears depends on getAccessState)
   CustomerTabs: undefined;
   ProviderTabs: undefined;
-  ProviderSetup: undefined;
   AccountGate: undefined;
   // Development only
   UIKit: undefined;

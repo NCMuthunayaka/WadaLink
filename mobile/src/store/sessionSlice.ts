@@ -3,7 +3,7 @@ import { authGateway } from '@/services/api/auth';
 import { toApiError, type ApiError } from '@/services/api/helpers';
 import { authToken } from '@/services/api/session';
 import { tokenStorage } from '@/services/tokenStorage';
-import type { LoginInput, ProviderProfileInput, RegisterInput } from '@/types/auth';
+import type { LoginInput, RegisterInput } from '@/types/auth';
 import type { User } from '@/types/user';
 import { api } from './api';
 
@@ -71,17 +71,6 @@ export const register = createAsyncThunk<User, RegisterInput, ThunkConfig>(
   },
 );
 
-export const saveProviderProfile = createAsyncThunk<User, ProviderProfileInput, ThunkConfig>(
-  'session/saveProviderProfile',
-  async (input, { rejectWithValue }) => {
-    try {
-      return await authGateway.saveProviderProfile(input);
-    } catch (e) {
-      return rejectWithValue(toApiError(e));
-    }
-  },
-);
-
 /** Re-read the user, e.g. to see whether a pending provider was approved. */
 export const refreshUser = createAsyncThunk<User, void, ThunkConfig>(
   'session/refreshUser',
@@ -121,7 +110,7 @@ const sessionSlice = createSlice({
         state.status = 'signedOut';
       })
       .addMatcher(
-        isAnyOf(login.fulfilled, register.fulfilled, saveProviderProfile.fulfilled, refreshUser.fulfilled),
+        isAnyOf(login.fulfilled, register.fulfilled, refreshUser.fulfilled),
         (state, action) => {
           state.user = action.payload;
           state.status = 'signedIn';

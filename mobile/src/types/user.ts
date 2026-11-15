@@ -1,19 +1,9 @@
-import type { ID, ISODate } from './common';
+import type { ID } from './common';
 
-// Mirrors users.role in the backend. One account has exactly one role.
+// Mirrors users.role and users.account_status in the backend.
+// One account has exactly one role.
 export type Role = 'customer' | 'provider' | 'admin';
 export type AccountStatus = 'active' | 'suspended' | 'pending';
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
-
-/** Provider-only data (providers table). */
-export interface ProviderProfile {
-  businessName?: string;
-  bio?: string;
-  experienceYears: number;
-  hourlyRate?: number;
-  serviceRadiusKm: number;
-  approvalStatus: ApprovalStatus;
-}
 
 export interface User {
   id: ID;
@@ -22,7 +12,4 @@ export interface User {
   phone?: string;
   role: Role;
   accountStatus: AccountStatus;
-  /** Present for providers once the backend returns it. */
-  providerProfile?: ProviderProfile;
-  createdAt: ISODate;
 }

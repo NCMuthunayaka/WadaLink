@@ -16,14 +16,6 @@ export interface RegisterInput {
   role: AuthRole;
 }
 
-export interface ProviderProfileInput {
-  businessName: string;
-  bio?: string;
-  experienceYears: number;
-  hourlyRate?: number;
-  serviceRadiusKm: number;
-}
-
 export interface AuthSession {
   token: string;
   user: User;
