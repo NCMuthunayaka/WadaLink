@@ -1,45 +1,41 @@
-import type { GeoPoint, ID } from './common';
-import type { ServiceCategory } from './request';
+import type { ID } from './common';
 
-export interface Provider {
-  id: ID;
-  name: string;
-  avatarUrl?: string;
-  headline: string; // "Master Electrician"
-  categories: ServiceCategory[];
-  rating: number;
-  reviewCount: number;
-  completedJobs: number;
-  verified: boolean;
-  licenseNumber?: string;
-  responseMinutes: number;
-  hourlyRate?: number;
-  location: GeoPoint;
-  serviceRadiusKm: number;
-  isOnline: boolean;
-}
+// provider_scores has one column per component (rating_score, price_score,
+// experience_score, distance_score, response_time_score) plus total_score.
+export type MatchComponent = 'rating' | 'proximity' | 'response' | 'price' | 'experience';
 
-/** Transparent AI ranking weights shown in the design. */
-export const MATCH_WEIGHTS = {
-  rating: 0.4,
-  proximity: 0.25,
-  responseTime: 0.2,
-  price: 0.15,
-} as const;
-
-/** Each component is 0 to 100; total is the weighted sum. */
-export interface MatchScore {
+/** Every value is 0 to 100. */
+export interface MatchScoreBreakdown {
   total: number;
   rating: number;
   proximity: number;
-  responseTime: number;
+  response: number;
   price: number;
+  experience: number;
 }
 
+/** One ranked provider for a request (provider_scores joined with provider data). */
 export interface MatchedProvider {
-  provider: Provider;
+  providerId: ID;
+  name: string;
+  businessName?: string;
+  experienceYears: number;
+  /** Average of the provider's reviews. */
+  rating: number;
+  reviewCount: number;
+  verified: boolean;
   distanceKm: number;
-  etaMinutes: number;
-  estimatedPrice: number;
-  score: MatchScore;
+  responseMinutes: number;
+  hourlyRate?: number;
+  estimatedPrice?: number;
+  /** rank_position, 1 = best */
+  rank: number;
+  score: MatchScoreBreakdown;
+}
+
+export interface MatchResult {
+  requestId: ID;
+  /** Weights the ranking used, summing to 1. Shown in the "transparent AI" banner. */
+  weights: Record<MatchComponent, number>;
+  providers: MatchedProvider[];
 }
