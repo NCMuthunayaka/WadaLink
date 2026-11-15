@@ -20,11 +20,6 @@ const GATES: Partial<Record<AccessState, Gate>> = {
     title: 'Application under review',
     message: 'Your provider account is waiting for approval. You can start taking jobs as soon as it is approved.',
   },
-  provider_rejected: {
-    icon: 'block',
-    title: 'Application not approved',
-    message: 'Your provider application was not approved. Contact WedaLink support for details.',
-  },
   suspended: {
     icon: 'lock',
     title: 'Account suspended',

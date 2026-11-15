@@ -51,9 +51,9 @@ export default function RegisterScreen({
       title="Create Your Account"
       subtitle={
         role === 'provider'
-          ? 'Join the network. You will set up your provider profile next.'
-          : 'Book trusted technicians in minutes.'
-      }
+            ? 'Join the network. New provider accounts may be reviewed before you can take jobs.'
+            : 'Book trusted technicians in minutes.'
+        }
     >
       <FormInput control={control} name="name" label="Full Name" placeholder="Alex Morgan" leftIcon="person-outline" autoComplete="name" />
       <FormInput

@@ -10,7 +10,7 @@ const email = z
 
 export const loginSchema = z.object({
   email,
-  password: z.string().min(1, 'Enter your password'),
+  password: z.string().min(1, 'Enter your password').max(128, 'Password is too long'),
 });
 export type LoginForm = z.infer<typeof loginSchema>;
 
@@ -23,7 +23,7 @@ export const registerSchema = z
       .trim()
       .max(20, 'Phone number is too long')
       .regex(/^[+0-9 ()-]*$/, 'Use digits, spaces and + ( ) - only'),
-    password: z.string().min(8, 'Use at least 8 characters'),
+    password: z.string().min(8, 'Use at least 8 characters').max(128, 'Use at most 128 characters'),
     confirmPassword: z.string(),
   })
   .refine((v) => v.password === v.confirmPassword, {
@@ -31,16 +31,3 @@ export const registerSchema = z
     path: ['confirmPassword'],
   });
 export type RegisterForm = z.infer<typeof registerSchema>;
-
-// Numbers are kept as strings in the form and converted on submit.
-export const providerSetupSchema = z.object({
-  businessName: z
-    .string()
-    .trim()
-    .min(2, 'Enter your business or display name')
-    .max(150, 'Name is too long'),
-  bio: z.string().trim().max(1000, 'Keep it under 1000 characters'),
-  experienceYears: z.string().regex(/^\d{1,2}$/, 'Enter whole years (0 to 99)'),
-  hourlyRate: z.string().regex(/^(\d{1,8}(\.\d{1,2})?)?$/, 'Enter an amount like 85 or 85.50'),
-});
-export type ProviderSetupForm = z.infer<typeof providerSetupSchema>;

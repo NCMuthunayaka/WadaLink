@@ -5,8 +5,8 @@ import { clone, delay, mockError } from './utils';
 
 // Demo accounts (all use the password "Password1!"):
 //   customer@wedalink.test   customer
-//   provider@wedalink.test   approved provider
-//   pending@wedalink.test    provider waiting for approval
+//   provider@wedalink.test   active provider
+//   pending@wedalink.test    provider whose account_status is still "pending"
 //   suspended@wedalink.test  suspended customer
 //   admin@wedalink.test      admin (not supported in the mobile app)
 interface MockAccount {
@@ -14,76 +14,28 @@ interface MockAccount {
   password: string;
 }
 
-const CREATED = '2026-01-01T00:00:00Z';
 const PASSWORD = 'Password1!';
-
-const approvedProfile = {
-  businessName: 'EcoVolt Solutions LLC',
-  bio: 'Master electrician, 8+ years in residential and light industrial work.',
-  experienceYears: 8,
-  hourlyRate: 85,
-  serviceRadiusKm: 15,
-  approvalStatus: 'approved' as const,
-};
 
 const accounts: MockAccount[] = [
   {
     password: PASSWORD,
-    user: {
-      id: '1',
-      name: 'Alex Morgan',
-      email: 'customer@wedalink.test',
-      phone: '+1 555-0184',
-      role: 'customer',
-      accountStatus: 'active',
-      createdAt: CREATED,
-    },
+    user: { id: '1', name: 'Alex Morgan', email: 'customer@wedalink.test', phone: '+1 555-0184', role: 'customer', accountStatus: 'active' },
   },
   {
     password: PASSWORD,
-    user: {
-      id: '2',
-      name: 'Marcus Rodriguez',
-      email: 'provider@wedalink.test',
-      role: 'provider',
-      accountStatus: 'active',
-      providerProfile: approvedProfile,
-      createdAt: CREATED,
-    },
+    user: { id: '2', name: 'Marcus Rodriguez', email: 'provider@wedalink.test', role: 'provider', accountStatus: 'active' },
   },
   {
     password: PASSWORD,
-    user: {
-      id: '3',
-      name: 'Pending Provider',
-      email: 'pending@wedalink.test',
-      role: 'provider',
-      accountStatus: 'active',
-      providerProfile: { ...approvedProfile, businessName: 'Pending Pro Co', approvalStatus: 'pending' },
-      createdAt: CREATED,
-    },
+    user: { id: '3', name: 'Pending Provider', email: 'pending@wedalink.test', role: 'provider', accountStatus: 'pending' },
   },
   {
     password: PASSWORD,
-    user: {
-      id: '4',
-      name: 'Site Admin',
-      email: 'admin@wedalink.test',
-      role: 'admin',
-      accountStatus: 'active',
-      createdAt: CREATED,
-    },
+    user: { id: '4', name: 'Site Admin', email: 'admin@wedalink.test', role: 'admin', accountStatus: 'active' },
   },
   {
     password: PASSWORD,
-    user: {
-      id: '5',
-      name: 'Suspended Customer',
-      email: 'suspended@wedalink.test',
-      role: 'customer',
-      accountStatus: 'suspended',
-      createdAt: CREATED,
-    },
+    user: { id: '5', name: 'Suspended Customer', email: 'suspended@wedalink.test', role: 'customer', accountStatus: 'suspended' },
   },
 ];
 
@@ -107,6 +59,7 @@ export const mockAuthGateway: AuthGateway = {
     return { token: TOKEN_PREFIX + account.user.id, user: clone(account.user) };
   },
 
+  // Like the real API, register returns a token and the user straight away.
   async register(input) {
     await delay(500);
     const email = input.email.trim().toLowerCase();
@@ -119,8 +72,8 @@ export const mockAuthGateway: AuthGateway = {
       email,
       phone: input.phone,
       role: input.role,
-      accountStatus: 'active',
-      createdAt: new Date().toISOString(),
+      // Mirrors the DB default: new providers wait for approval.
+      accountStatus: input.role === 'provider' ? 'pending' : 'active',
     };
     accounts.push({ user, password: input.password });
     return { token: TOKEN_PREFIX + user.id, user: clone(user) };
@@ -129,17 +82,5 @@ export const mockAuthGateway: AuthGateway = {
   async me() {
     await delay(250);
     return clone(accountFromToken(authToken.get()).user);
-  },
-
-  async saveProviderProfile(input) {
-    await delay(400);
-    const account = accountFromToken(authToken.get());
-    if (account.user.role !== 'provider') throw mockError(403, 'Only providers have a provider profile');
-    account.user.providerProfile = {
-      ...input,
-      // New providers start as pending until an admin approves them.
-      approvalStatus: account.user.providerProfile?.approvalStatus ?? 'pending',
-    };
-    return clone(account.user);
   },
 };
