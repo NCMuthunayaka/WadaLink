@@ -4,10 +4,10 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { setFilter } from '@/store/equipmentSlice';
 import { useAppDispatch } from '@/store/hooks';
 import { useUpdateEquipmentStatusMutation } from '@/services/api/equipment';
@@ -152,7 +152,7 @@ export default function EquipmentManagementScreen() {
     
     <SafeAreaView style={styles.safeArea}>
       
-      <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
+      <StatusBar style="dark" />
 
       {/* ── App Header ─────────────────────────── */}
       <View style={styles.header}>
