@@ -1,45 +1,72 @@
-import type { Address, ID, ISODate } from './common';
+import type { ID, ISODate } from './common';
 
-export const SERVICE_CATEGORIES = [
-  'electrical',
-  'plumbing',
-  'hvac',
-  'carpentry',
-  'painting',
-  'appliance',
-  'general',
-] as const;
-export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number];
+// Mirrors service_categories (category_id, category_name, description, parent_category_id).
+export interface ServiceCategory {
+  id: ID;
+  name: string;
+  description?: string;
+  parentId?: ID;
+}
 
-export const URGENCY_LEVELS = ['standard', 'urgent', 'emergency'] as const;
+// Mirrors service_requests.urgency. The design offers three of these:
+// Standard = medium, Urgent = high, Emergency = emergency.
+export const URGENCY_LEVELS = ['low', 'medium', 'high', 'emergency'] as const;
 export type Urgency = (typeof URGENCY_LEVELS)[number];
 
-export type RequestStatus = 'draft' | 'open' | 'quoted' | 'booked' | 'cancelled';
+// Mirrors service_requests.status.
+export const REQUEST_STATUSES = ['open', 'assigned', 'in_progress', 'completed', 'cancelled'] as const;
+export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 
 export interface ServiceRequest {
   id: ID;
   customerId: ID;
-  category: ServiceCategory;
+  categoryId?: ID;
+  selectedProviderId?: ID;
+  title: string; // max 200
+  description: string;
+  urgency: Urgency;
+  address: string; // max 255
+  latitude?: number;
+  longitude?: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  status: RequestStatus;
+  createdAt: ISODate;
+  updatedAt: ISODate;
+}
+
+export interface NewRequestInput {
+  categoryId: ID;
   title: string;
   description: string;
   urgency: Urgency;
-  address: Address;
-  scheduledFor?: ISODate;
-  photos: string[];
-  status: RequestStatus;
-  createdAt: ISODate;
+  address: string;
+  budgetMin?: number;
+  budgetMax?: number;
 }
 
-export type RiskLevel = 'low' | 'medium' | 'high';
+// Mirrors classification_logs.status.
+export type ClassificationStatus = 'success' | 'failed' | 'fallback';
 
+/**
+ * One classification_logs row. `details` is what the backend should store in
+ * output_json so the AI result screen can render it.
+ */
 export interface AIClassification {
   requestId: ID;
-  category: ServiceCategory;
-  /** 0 to 1 */
+  categoryId?: ID;
+  categoryName: string;
+  predictedUrgency: Urgency;
+  /** 0 to 1 (confidence_score) */
   confidence: number;
-  risk: RiskLevel;
-  probableCause: string;
-  estimatedDurationMinutes: { min: number; max: number };
-  costBenchmark: { min: number; max: number };
-  safetyTips: string[];
+  status: ClassificationStatus;
+  details: {
+    riskHeadline?: string;
+    anomaly?: string;
+    rootCause?: string;
+    credentials?: string;
+    durationHours?: { min: number; max: number };
+    costRange?: { min: number; max: number };
+    safetyTips: string[];
+  };
 }
