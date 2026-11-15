@@ -1,15 +1,15 @@
-import type { ID, ISODate } from './common';
+import type { ID } from './common';
 
-export type Role = 'customer' | 'provider' | 'equipment_owner';
+// Mirrors users.role and users.account_status in the backend.
+// One account has exactly one role.
+export type Role = 'customer' | 'provider' | 'admin';
+export type AccountStatus = 'active' | 'suspended' | 'pending';
 
 export interface User {
   id: ID;
   name: string;
   email: string;
   phone?: string;
-  avatarUrl?: string;
-  /** One account can hold several roles (the profile hub lets you switch). */
-  roles: Role[];
-  activeRole: Role;
-  createdAt: ISODate;
+  role: Role;
+  accountStatus: AccountStatus;
 }

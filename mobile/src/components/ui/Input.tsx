@@ -22,7 +22,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-const Input = React.forwardRef<TextInput, InputProps>(function Input(
+const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(function Input(
   {
     label,
     helper,
