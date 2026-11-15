@@ -143,7 +143,7 @@ export default function UIKitScreen({ navigation }: NativeStackScreenProps<RootS
           <Button label="Open sheet" variant="secondary" onPress={() => setSheetOpen(true)} />
         </Section>
 
-        <Button label="Go to Provider tabs" onPress={() => navigation.navigate('ProviderTabs')} variant="outline" fullWidth />
+        <Button label="Close" onPress={() => navigation.goBack()} variant="outline" fullWidth />
       </ScrollView>
 
       <BottomSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} title="Filter jobs">
