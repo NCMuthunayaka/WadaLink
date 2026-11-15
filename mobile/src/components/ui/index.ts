@@ -3,6 +3,7 @@ export { default as BottomSheet } from './BottomSheet';
 export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as Chip } from './Chip';
+export { default as FormInput } from './FormInput';
 export { default as Icon } from './Icon';
 export type { IconName } from './Icon';
 export { default as Input } from './Input';
