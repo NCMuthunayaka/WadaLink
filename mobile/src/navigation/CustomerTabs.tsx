@@ -1,27 +1,23 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import PlaceholderScreen from '@/components/common/PlaceholderScreen';
+import CustomerHomeScreen from '@/features/requests/screens/CustomerHomeScreen';
+import MyRequestsScreen from '@/features/requests/screens/MyRequestsScreen';
 import ProfileScreen from '@/features/profile/screens/ProfileScreen';
 import { tabIcon } from '@/navigation/TabIcon';
 import { tabBarScreenOptions } from '@/navigation/tabBarOptions';
+import type { CustomerTabParamList } from '@/navigation/types';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<CustomerTabParamList>();
 
 export default function CustomerTabs() {
   return (
     <Tab.Navigator screenOptions={tabBarScreenOptions}>
-      <Tab.Screen name="Home" options={{ tabBarIcon: tabIcon('home') }}>
-        {() => <PlaceholderScreen title="Home" icon="home" />}
-      </Tab.Screen>
-
-      <Tab.Screen name="Jobs" options={{ tabBarIcon: tabIcon('work') }}>
-        {() => <PlaceholderScreen title="Jobs" icon="work" />}
-      </Tab.Screen>
-
+      <Tab.Screen name="Home" component={CustomerHomeScreen} options={{ tabBarIcon: tabIcon('home') }} />
+      <Tab.Screen name="Jobs" component={MyRequestsScreen} options={{ tabBarIcon: tabIcon('work') }} />
       <Tab.Screen name="Messages" options={{ tabBarIcon: tabIcon('chat-bubble-outline') }}>
         {() => <PlaceholderScreen title="Messages" icon="chat-bubble-outline" />}
       </Tab.Screen>
-
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: tabIcon('account-circle') }} />
     </Tab.Navigator>
   );
