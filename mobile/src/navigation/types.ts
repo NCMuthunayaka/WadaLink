@@ -1,5 +1,19 @@
-// Typed route params. Step 5 extends this with the auth and role stacks.
+import type { AuthRole } from '@/types/auth';
+
+export type AuthStackParamList = {
+  RoleSelection: undefined;
+  Login: { role: AuthRole };
+  Register: { role: AuthRole };
+};
+
 export type RootStackParamList = {
-  UIKit: undefined;
+  // Signed out
+  Auth: undefined;
+  // Signed in (which one appears depends on getAccessState)
+  CustomerTabs: undefined;
   ProviderTabs: undefined;
+  ProviderSetup: undefined;
+  AccountGate: undefined;
+  // Development only
+  UIKit: undefined;
 };
