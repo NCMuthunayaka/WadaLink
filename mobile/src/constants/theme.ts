@@ -104,11 +104,12 @@ export const shadow = {
 };
 
 export const statusColors: Record<string, { bg: string; text: string; dot: string }> = {
-  available: { bg: colors.successLight, text: colors.revenuePositive, dot: colors.success },
-  reserved: { bg: '#FEE2E2', text: '#B91C1C', dot: '#EF4444' },
-  in_rent:  { bg: colors.primaryLight, text: colors.primaryDark, dot: colors.primary },
-  return_pending: { bg: colors.warningLight, text: '#92400E', dot: colors.warning },
-  maintenance: { bg: colors.borderLight, text: colors.textSecondary, dot: colors.textMuted },
+  available: { bg: '#E6F8F5', text: '#0D9488', dot: '#0D9488' },
+  reserved: { bg: '#FEF3C7', text: '#B45309', dot: '#F59E0B' },
+  in_rent:  { bg: '#EFF6FF', text: '#1D4ED8', dot: '#2563EB' },
+  return_pending: { bg: '#EDE9FE', text: '#6D28D9', dot: '#7C3AED' },
+  inspection: { bg: '#E0F2FE', text: '#0369A1', dot: '#0284C7' },
+  maintenance: { bg: '#F3F4F6', text: '#4B5563', dot: '#9CA3AF' },
 };
 
 export const statusLabels: Record<string, string> = {
@@ -116,5 +117,6 @@ export const statusLabels: Record<string, string> = {
   reserved: 'Reserved',
   in_rent: 'In Rent',
   return_pending: 'Return Pending',
+  inspection: 'Inspection',
   maintenance: 'Maintenance',
 };
