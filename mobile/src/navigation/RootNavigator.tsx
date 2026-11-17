@@ -4,7 +4,7 @@ import LoadingState from '@/components/common/LoadingState';
 import AccountGateScreen from '@/features/auth/screens/AccountGateScreen';
 import UIKitScreen from '@/features/dev/screens/UIKitScreen';
 import AuthNavigator from '@/navigation/AuthNavigator';
-import CustomerTabs from '@/navigation/CustomerTabs';
+import CustomerNavigator from '@/navigation/CustomerNavigator';
 import ProviderTabs from '@/navigation/ProviderTabs';
 import type { RootStackParamList } from '@/navigation/types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -33,7 +33,7 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {access === null ? <Stack.Screen name="Auth" component={AuthNavigator} /> : null}
-      {access === 'customer' ? <Stack.Screen name="CustomerTabs" component={CustomerTabs} /> : null}
+      {access === 'customer' ? <Stack.Screen name="CustomerApp" component={CustomerNavigator} /> : null}
       {access === 'provider' ? <Stack.Screen name="ProviderTabs" component={ProviderTabs} /> : null}
       {showGate ? <Stack.Screen name="AccountGate" component={AccountGateScreen} /> : null}
       {__DEV__ && access !== null ? <Stack.Screen name="UIKit" component={UIKitScreen} /> : null}

@@ -84,3 +84,9 @@ export const mockAuthGateway: AuthGateway = {
     return clone(accountFromToken(authToken.get()).user);
   },
 };
+
+/** Id of the signed-in mock user, so other mock services can scope data to them. */
+export function mockCurrentUserId(): string | null {
+  const token = authToken.get();
+  return token?.startsWith(TOKEN_PREFIX) ? token.slice(TOKEN_PREFIX.length) : null;
+}
