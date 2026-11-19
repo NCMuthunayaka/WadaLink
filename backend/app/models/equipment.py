@@ -1,33 +1,56 @@
-from sqlalchemy import Column, Integer, String, Text, Numeric, DateTime, JSON, ForeignKey, func
-from sqlalchemy.orm import relationship
-from app.core.database import Base
+import enum
+from decimal import Decimal
+from typing import TYPE_CHECKING, List, Optional
+
+from sqlalchemy import CheckConstraint, ForeignKey, Index, Numeric, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base, BigIntUnsigned, TimestampMixin, db_enum
+
+if TYPE_CHECKING:
+    from .equipment_reservation import EquipmentReservation
+    from .provider import Provider
 
 
-class Equipment(Base):
+class EquipmentStatus(str, enum.Enum):
+    AVAILABLE = "available"
+    RESERVED = "reserved"
+    UNAVAILABLE = "unavailable"
+    SUSPENDED = "suspended"
+
+
+class Equipment(TimestampMixin, Base):
     __tablename__ = "equipment"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    name = Column(String(255), nullable=False)
-    category = Column(String(100), nullable=False, index=True)
-    description = Column(Text, nullable=True)
-    image_url = Column(String(500), nullable=True)
-    price_per_day = Column(Numeric(10, 2), nullable=False)
-    deposit = Column(Numeric(10, 2), default=0.00)
-    delivery_fee = Column(Numeric(10, 2), default=0.00)
-    delivery_radius = Column(Integer, default=0)
-    status = Column(String(30), nullable=False, default="available", index=True)
-    tags = Column(JSON, nullable=True, default=list)
-    pickup_location = Column(String(255), nullable=True)
-    return_location = Column(String(255), nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-
-    # Relationships
-    owner = relationship("User", back_populates="equipment_owned")
-    reservations = relationship(
-        "EquipmentReservation",
-        back_populates="equipment",
-        cascade="all, delete-orphan",
-        order_by="desc(EquipmentReservation.created_at)"
+    __table_args__ = (
+        CheckConstraint("daily_rate >= 0", name="chk_eq_rate"),
+        CheckConstraint("deposit_amount >= 0", name="chk_eq_deposit"),
+        Index("idx_eq_status_category", "status", "category"),
     )
+
+    equipment_id: Mapped[int] = mapped_column(BigIntUnsigned, primary_key=True, autoincrement=True)
+    owner_provider_id: Mapped[int] = mapped_column(
+        BigIntUnsigned,
+        ForeignKey("providers.provider_id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    equipment_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    category: Mapped[Optional[str]] = mapped_column(String(100))
+    daily_rate: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    deposit_amount: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("0.00"), server_default="0.00"
+    )
+    condition_description: Mapped[Optional[str]] = mapped_column(Text)
+    status: Mapped[EquipmentStatus] = mapped_column(
+        db_enum(EquipmentStatus, "equipment_status"),
+        nullable=False,
+        default=EquipmentStatus.AVAILABLE,
+        server_default=EquipmentStatus.AVAILABLE.value,
+    )
+
+    owner: Mapped["Provider"] = relationship(back_populates="equipment")
+    reservations: Mapped[List["EquipmentReservation"]] = relationship(back_populates="equipment")
+
+    def __repr__(self) -> str:
+        return f"<Equipment id={self.equipment_id} name={self.equipment_name!r}>"
