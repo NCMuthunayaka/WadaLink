@@ -1,1 +1,1 @@
-# backend + MySQL (mobile app runs via Expo, admin via Vite)
+# WedaLink uses Neon PostgreSQL. Run the backend locally and use Neon as DATABASE_URL.
