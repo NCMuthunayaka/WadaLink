@@ -2,12 +2,13 @@ import os
 from dotenv import load_dotenv
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from app.core.config import settings
 
 load_dotenv()
 
 config = context.config
 
-database_url = os.getenv("DATABASE_URL")
+database_url = settings.DATABASE_URL
 
 if not database_url:
     raise RuntimeError("DATABASE_URL is missing from .env")
@@ -17,8 +18,8 @@ config.set_main_option(
     database_url.replace("%", "%%"),
 )
 
-from app.models.base import Base
-from app.models.user import User
+from app.models import Base
+import app.models  # noqa: F401 - register every model with Base.metadata
 
 target_metadata = Base.metadata
 

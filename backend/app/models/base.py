@@ -2,20 +2,19 @@
 """Shared SQLAlchemy base, column types, and database session helpers."""
 
 import enum
-import os
 from datetime import datetime
 from typing import Type
 
-from dotenv import load_dotenv
+from app.core.config import settings
 from sqlalchemy import (
     BigInteger,
+    Integer,
     DateTime,
     Enum as SAEnum,
     SmallInteger,
     create_engine,
     func,
 )
-from sqlalchemy.dialects.mysql import BIGINT, TINYINT
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -23,20 +22,7 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-# Load environment variables from .env
-load_dotenv()
-
-# Database configuration
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not configured in the .env file")
-
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-)
+engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(
     bind=engine,
@@ -53,15 +39,12 @@ class Base(DeclarativeBase):
 
 # Shared column types
 
-# BIGINT UNSIGNED on MySQL; BIGINT elsewhere.
-BigIntUnsigned = BigInteger().with_variant(
-    BIGINT(unsigned=True), "mysql"
-)
-
-# TINYINT UNSIGNED on MySQL; SMALLINT elsewhere.
-TinyIntUnsigned = SmallInteger().with_variant(
-    TINYINT(unsigned=True), "mysql"
-)
+# Neon is PostgreSQL, so the canonical model types are PostgreSQL-neutral.
+# PostgreSQL has no UNSIGNED integer type; range checks belong in constraints.
+# SQLite only supports automatic rowid generation for INTEGER PRIMARY KEY.
+# Keep BIGINT on Neon/PostgreSQL while making the test database equivalent.
+BigIntUnsigned = BigInteger().with_variant(Integer, "sqlite")
+TinyIntUnsigned = SmallInteger()
 
 
 # Enum helper
