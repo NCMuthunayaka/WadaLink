@@ -1,17 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from fastapi import Depends
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import get_db
 import app.models  # ensure models are registered
 from app.api.v1 import api_v1_router
+from app.routes.auth_routes import router as auth_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Auto-create tables on startup (if not already managed by alembic)
-    Base.metadata.create_all(bind=engine)
+    # Schema is managed explicitly with Alembic, not implicitly at startup.
     yield
 
 
@@ -40,5 +43,7 @@ app.include_router(
 )
 
 @app.get("/health")
-def health():
-    return {"status": "ok", "module": "Module 3 - Equipment Rental"}
+def health(db: Session = Depends(get_db)):
+    """Application and database connectivity probe."""
+    db.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "connected"}
