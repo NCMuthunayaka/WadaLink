@@ -234,6 +234,7 @@ export const statusLabels: Record<string, string> = {
   reserved: 'Reserved',
   in_rent: 'In Rent',
   return_pending: 'Return Pending',
+  inspection: 'Inspection',
   maintenance: 'Maintenance',
 };
 
