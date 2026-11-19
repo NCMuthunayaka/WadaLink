@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { env } from '@/config/env';
+import { authToken, notifyUnauthorized } from './session';
 
 // Base API URL with environment fallback
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
@@ -32,8 +34,6 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-import { env } from '@/config/env';
-import { authToken, notifyUnauthorized } from './session';
 
 export const http = axios.create({
   baseURL: env.apiUrl,
