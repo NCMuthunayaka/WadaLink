@@ -17,39 +17,16 @@ if TYPE_CHECKING:
 class ReservationStatus(str, enum.Enum):
     PENDING = "pending"
     RESERVED = "reserved"
+    IN_RENT = "in_rent"
+    RETURN_PENDING = "return_pending"
     RETURNED = "returned"
     CANCELLED = "cancelled"
 
 
 class EquipmentReservation(Base):
+    """Normalized equipment reservation linked to a provider renter."""
+
     __tablename__ = "equipment_reservations"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    equipment_id = Column(Integer, ForeignKey("equipment.id", ondelete="CASCADE"), nullable=False, index=True)
-    renter_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime, nullable=False)
-    total_days = Column(Integer, nullable=False, default=1)
-    daily_price = Column(Numeric(10, 2), nullable=False)
-    total_price = Column(Numeric(10, 2), nullable=False)
-    hold_amount = Column(Numeric(10, 2), default=0.00)
-    delivery_fee = Column(Numeric(10, 2), default=0.00)
-    status = Column(String(30), nullable=False, default="reserved", index=True)
-    pickup_location = Column(String(255), nullable=True)
-    return_location = Column(String(255), nullable=True)
-    payment_cleared = Column(Boolean, default=False)
-    notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-
-    # Relationships
-    equipment = relationship("Equipment", back_populates="reservations")
-    renter = relationship("User", back_populates="reservations")
-
-    # Composite Index for efficient conflict/double-booking checks
-    __table_args__ = (
-        Index("idx_res_equipment_dates", "equipment_id", "start_date", "end_date"),
-    )
     __table_args__ = (
         CheckConstraint("end_datetime > start_datetime", name="chk_er_dates"),
         CheckConstraint("daily_rate_snapshot >= 0", name="chk_er_rate"),
@@ -62,6 +39,7 @@ class EquipmentReservation(Base):
         BigIntUnsigned,
         ForeignKey("equipment.equipment_id", ondelete="RESTRICT", onupdate="CASCADE"),
         nullable=False,
+        index=True,
     )
     renter_provider_id: Mapped[int] = mapped_column(
         BigIntUnsigned,
@@ -76,7 +54,6 @@ class EquipmentReservation(Base):
     )
     start_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    # Price agreed at booking time; unaffected by later rate changes
     daily_rate_snapshot: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     total_cost: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     status: Mapped[ReservationStatus] = mapped_column(
@@ -88,13 +65,10 @@ class EquipmentReservation(Base):
     )
     reserved_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     returned_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     equipment: Mapped["Equipment"] = relationship(back_populates="reservations")
     renter: Mapped["Provider"] = relationship(back_populates="equipment_reservations")
     related_request: Mapped[Optional["ServiceRequest"]] = relationship(
         back_populates="equipment_reservations"
     )
-
-    def __repr__(self) -> str:
-        return f"<EquipmentReservation id={self.reservation_id} status={self.status.value}>"

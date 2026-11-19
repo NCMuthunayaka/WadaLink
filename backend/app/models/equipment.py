@@ -15,6 +15,9 @@ if TYPE_CHECKING:
 class EquipmentStatus(str, enum.Enum):
     AVAILABLE = "available"
     RESERVED = "reserved"
+    IN_RENT = "in_rent"
+    RETURN_PENDING = "return_pending"
+    MAINTENANCE = "maintenance"
     UNAVAILABLE = "unavailable"
     SUSPENDED = "suspended"
 
