@@ -27,7 +27,7 @@ export default function LoginScreen({
   navigation,
   route,
 }: NativeStackScreenProps<AuthStackParamList, 'Login'>) {
-  const { role } = route.params;
+  const role = route.params?.role ?? 'customer';
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
