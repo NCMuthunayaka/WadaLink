@@ -158,3 +158,8 @@ export interface FilterCount {
   label: string;
   count: number;
 }
+
+
+export type NewEquipmentInput = Omit<Equipment, 'id' | 'status' | 'activeRental'> & {
+  status?: EquipmentStatus;
+};

@@ -34,6 +34,10 @@ app.add_middleware(
 # Include API v1 router
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
+app.include_router(
+    auth_router,
+    prefix="/api",
+)
 
 @app.get("/health")
 def health():

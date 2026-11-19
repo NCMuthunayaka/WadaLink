@@ -1,24 +1,20 @@
 import React from 'react';
 import {
   View,
-  Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
   Alert,
 } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  selectFilteredEquipment,
-  selectStats,
-  selectFilterCounts,
-  selectActiveFilter,
-  setFilter,
-  updateEquipmentStatus,
-} from '../../../store/equipmentSlice';
-import type { RootState } from '../../../store/store';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { setFilter } from '@/store/equipmentSlice';
+import { useAppDispatch } from '@/store/hooks';
+import { useUpdateEquipmentStatusMutation } from '@/services/api/equipment';
+import { useEquipmentFleet } from '@/features/equipment/hooks/useEquipmentFleet';
+import ErrorState from '@/components/common/ErrorState';
+import LoadingState from '@/components/common/LoadingState';
+import Text from '@/components/ui/Text';
 import { colors, fontSize, fontWeight, radius, spacing, shadow } from '../../../constants/theme';
 import StatsRow from '../components/StatsRow';
 import FilterTabs from '../components/FilterTabs';
@@ -29,11 +25,17 @@ import Button from '../../../components/ui/Button';
 import type { Equipment, FilterTab } from '../../../types/equipment';
 
 export default function EquipmentManagementScreen() {
-  const dispatch = useDispatch();
-  const equipment = useSelector(selectFilteredEquipment);
-  const stats = useSelector(selectStats);
-  const filterCounts = useSelector(selectFilterCounts);
-  const activeFilter = useSelector(selectActiveFilter);
+    const dispatch = useAppDispatch();
+  const {
+    items: equipment,
+    stats,
+    filterCounts,
+    activeFilter,
+    status,
+    isRefreshing,
+    refetch,
+  } = useEquipmentFleet();
+  const [updateStatus] = useUpdateEquipmentStatusMutation();
 
   const handleFilterSelect = (filter: FilterTab) => {
     dispatch(setFilter(filter));
@@ -51,19 +53,30 @@ export default function EquipmentManagementScreen() {
     Alert.alert('Edit Listing', `Editing listing for item ${id}`);
   };
 
-  const handlePauseListing = (id: string) => {
-    dispatch(updateEquipmentStatus({ id, status: 'maintenance' }));
-    Alert.alert('Paused', 'Listing has been paused.');
-  };
 
   const handleBookings = (id: string) => {
     Alert.alert('Bookings', `Viewing bookings for item ${id}`);
   };
 
-  const handleCheckIn = (id: string) => {
-    dispatch(updateEquipmentStatus({ id, status: 'available' }));
-    Alert.alert('Checked In ✅', 'Equipment marked as available.');
+    const changeStatus = async (
+    id: string,
+    next: Equipment['status'],
+    successTitle: string,
+    successMessage: string,
+  ) => {
+    try {
+      await updateStatus({ id, status: next }).unwrap();
+      Alert.alert(successTitle, successMessage);
+    } catch {
+      Alert.alert('Something went wrong', 'The change could not be saved. Please try again.');
+    }
   };
+
+  const handlePauseListing = (id: string) =>
+    changeStatus(id, 'maintenance', 'Paused', 'Listing has been paused.');
+
+  const handleCheckIn = (id: string) =>
+    changeStatus(id, 'available', 'Checked In ✅', 'Equipment marked as available.');
 
   const handleAddEquipment = () => {
     Alert.alert('Add Equipment', 'Opening equipment creation form…');
@@ -104,7 +117,7 @@ export default function EquipmentManagementScreen() {
       <View style={styles.ctaWrapper}>
         <Button
           label="Add New Equipment"
-          icon="⊕"
+          icon="add-circle-outline"
           onPress={handleAddEquipment}
           variant="primary"
           size="lg"
@@ -132,9 +145,14 @@ export default function EquipmentManagementScreen() {
     />
   );
 
+  if (status === 'loading') return <LoadingState label="Loading your fleet…" />;
+  if (status === 'error') return <ErrorState onRetry={refetch} />;
+
   return (
+    
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
+      
+      <StatusBar style="dark" />
 
       {/* ── App Header ─────────────────────────── */}
       <View style={styles.header}>
@@ -158,6 +176,8 @@ export default function EquipmentManagementScreen() {
         ListHeaderComponent={ListHeader}
         ListFooterComponent={ListFooter}
         contentContainerStyle={styles.listContent}
+        refreshing={isRefreshing}
+        onRefresh={refetch}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -169,6 +189,7 @@ export default function EquipmentManagementScreen() {
           </View>
         }
       />
+      
     </SafeAreaView>
   );
 }

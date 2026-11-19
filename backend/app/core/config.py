@@ -1,14 +1,16 @@
 import os
-from typing import List
-from pydantic import BaseModel
+from pathlib import Path
+from dotenv import load_dotenv
 
+# Locate backend/.env regardless of the terminal's working directory
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(ENV_FILE)
 
-class Settings(BaseModel):
-    PROJECT_NAME: str = "WedaLink API"
-    API_V1_STR: str = "/api/v1"
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./wedalink.db")
-    CORS_ORIGINS: List[str] = ["*"]
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "wedalink-secret-key-development")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
-
-settings = Settings()
+if not JWT_SECRET_KEY:
+    raise RuntimeError(
+        "JWT_SECRET_KEY is not configured. "
+        "Set it in your environment before starting the application."
+    )
