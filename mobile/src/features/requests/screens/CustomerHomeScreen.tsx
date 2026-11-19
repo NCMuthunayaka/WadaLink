@@ -38,11 +38,12 @@ export default function CustomerHomeScreen({ navigation }: CustomerTabScreenProp
         />
       }
     >
-      <View>
-        <Text variant="headlineMd">Hello, {firstName} 👋</Text>
-        <Text variant="bodyMd" color={colors.textSecondary}>
-          What do you need help with today?
-        </Text>
+      <View style={styles.welcomeRow}>
+        <View style={styles.welcomeIcon}><Icon name="home-repair-service" size={22} color={colors.primary} /></View>
+        <View style={styles.welcomeText}>
+          <Text variant="headlineMd">Hello, {firstName} 👋</Text>
+          <Text variant="bodyMd" color={colors.textSecondary}>What do you need help with today?</Text>
+        </View>
       </View>
 
       <Card variant="dark" style={styles.dispatch}>
@@ -121,9 +122,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    backgroundColor: colors.warningLight,
   },
   dispatchText: { flex: 1 },
+  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  welcomeIcon: { width: 46, height: 46, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primaryLight },
+  welcomeText: { flex: 1, gap: spacing.xs },
   section: { gap: spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: spacing.base },
 });

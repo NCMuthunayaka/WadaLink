@@ -40,9 +40,11 @@ export default function ProfileScreen() {
         <Text variant="bodyMd" color={colors.textSecondary}>
           {user.email}
         </Text>
-        <Text variant="labelMd" color={colors.primary} style={styles.role}>
+        <View style={styles.roleBadge}>
+          <Text variant="labelMd" color={colors.secondary} style={styles.role}>
           {ROLE_LABELS[user.role]}
-        </Text>
+          </Text>
+        </View>
       </Card>
 
       <Button label="Sign out" variant="outline" size="lg" fullWidth icon="logout" onPress={confirmSignOut} />
@@ -58,4 +60,5 @@ const styles = StyleSheet.create({
   card: { alignItems: 'center', gap: spacing.xs },
   name: { marginTop: spacing.sm },
   role: { marginTop: spacing.xs },
+  roleBadge: { marginTop: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.secondaryContainer },
 });

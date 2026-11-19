@@ -4,9 +4,10 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthRole } from '@/types/auth';
 
 export type AuthStackParamList = {
+  Landing: undefined;
   RoleSelection: undefined;
-  Login: { role: AuthRole };
-  Register: { role: AuthRole };
+  Login: { role?: AuthRole } | undefined;
+  Register: { role?: AuthRole } | undefined;
 };
 
 export type CustomerTabParamList = {

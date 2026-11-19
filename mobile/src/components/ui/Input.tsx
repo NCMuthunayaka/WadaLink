@@ -17,6 +17,8 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   helper?: string;
   error?: string;
   leftIcon?: IconName;
+  /** Fixed, non-editable prefix displayed inside the field (e.g. country code). */
+  prefix?: string;
   rightIcon?: IconName;
   onRightIconPress?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
@@ -28,6 +30,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(f
     helper,
     error,
     leftIcon,
+    prefix,
     rightIcon,
     onRightIconPress,
     containerStyle,
@@ -59,6 +62,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(f
         ]}
       >
         {leftIcon ? <Icon name={leftIcon} size={20} color={colors.textMuted} style={styles.leftIcon} /> : null}
+        {prefix ? <Text variant="bodyLg" color={colors.textSecondary} style={styles.prefix}>{prefix}</Text> : null}
 
         <TextInput
           ref={ref}
@@ -117,6 +121,7 @@ const styles = StyleSheet.create({
   fieldMultiline: { alignItems: 'flex-start', paddingVertical: spacing.sm },
   fieldDisabled: { backgroundColor: colors.surfaceLow, opacity: 0.7 },
   leftIcon: { marginRight: spacing.sm },
+  prefix: { marginRight: spacing.xs, fontWeight: '600' },
   input: {
     flex: 1,
     ...typography.bodyLg,

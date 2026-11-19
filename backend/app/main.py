@@ -9,7 +9,6 @@ from app.core.config import settings
 from app.core.database import get_db
 import app.models  # ensure models are registered
 from app.api.v1 import api_v1_router
-from app.routes.auth_routes import router as auth_router
 
 
 @asynccontextmanager
@@ -36,11 +35,6 @@ app.add_middleware(
 
 # Include API v1 router
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
-
-app.include_router(
-    auth_router,
-    prefix="/api",
-)
 
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
