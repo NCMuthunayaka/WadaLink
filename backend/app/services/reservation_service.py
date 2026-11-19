@@ -1,280 +1,109 @@
 import math
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 
-from app.models.equipment import Equipment
-from app.models.equipment_reservation import EquipmentReservation
-from app.models.user import User
-from app.schemas.equipment_reservation import (
-    ReservationCreate,
-    ReservationStatusUpdate,
-    ReservationResponse,
-)
+from app.models.equipment import Equipment, EquipmentStatus
+from app.models.equipment_reservation import EquipmentReservation, ReservationStatus
+from app.models.provider import Provider
+from app.schemas.equipment_reservation import ReservationCreate, ReservationResponse, ReservationStatusUpdate
 
 
 class ReservationService:
     VALID_STATUSES = {"reserved", "in_rent", "return_pending", "returned", "cancelled"}
+    ACTIVE_STATUSES = [ReservationStatus.RESERVED, ReservationStatus.IN_RENT, ReservationStatus.RETURN_PENDING]
 
     @staticmethod
-    def check_conflict(
-        db: Session,
-        equipment_id: int,
-        start_date: datetime,
-        end_date: datetime,
-        exclude_reservation_id: Optional[int] = None,
-    ) -> Optional[EquipmentReservation]:
-        """
-        Double-Booking Validation Algorithm:
-        Determines whether the given equipment is already booked during any part of [start_date, end_date].
-        Overlap formula: (existing.start_date < end_date) AND (existing.end_date > start_date)
-        """
+    def check_conflict(db: Session, equipment_id: int, start_date: datetime, end_date: datetime,
+                       exclude_reservation_id: Optional[int] = None):
         query = db.query(EquipmentReservation).filter(
             EquipmentReservation.equipment_id == equipment_id,
-            EquipmentReservation.status.in_(["reserved", "in_rent", "return_pending"]),
-            EquipmentReservation.start_date < end_date,
-            EquipmentReservation.end_date > start_date,
+            EquipmentReservation.status.in_(ReservationService.ACTIVE_STATUSES),
+            EquipmentReservation.start_datetime < end_date,
+            EquipmentReservation.end_datetime > start_date,
         )
-
         if exclude_reservation_id:
-            query = query.filter(EquipmentReservation.id != exclude_reservation_id)
-
-        # Check for conflicts
+            query = query.filter(EquipmentReservation.reservation_id != exclude_reservation_id)
         return query.first()
 
     @classmethod
-    def create_reservation(
-        db: Session,
-        reservation_in: ReservationCreate,
-        renter_id: int,
-    ) -> ReservationResponse:
-        """
-        Creates a new reservation with double-booking validation and ACID transaction.
-        Lifecycle transition: (available -> reserved)
-        """
-        # 1. Fetch equipment
-        equipment = db.query(Equipment).filter(Equipment.id == reservation_in.equipment_id).first()
+    def create_reservation(cls, db: Session, reservation_in: ReservationCreate, renter_id: int):
+        equipment = db.query(Equipment).filter(Equipment.equipment_id == reservation_in.equipment_id).first()
         if not equipment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Equipment with ID {reservation_in.equipment_id} not found."
-            )
-
-        if equipment.status == "maintenance":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Equipment is currently under maintenance and cannot be reserved."
-            )
-
-        # 2. Conflict / Double-booking Validation
-        conflict = ReservationService.check_conflict(
-            db=db,
-            equipment_id=reservation_in.equipment_id,
-            start_date=reservation_in.start_date,
-            end_date=reservation_in.end_date,
-        )
-
+            raise HTTPException(status_code=404, detail="Equipment not found")
+        conflict = cls.check_conflict(db, equipment.equipment_id, reservation_in.start_date, reservation_in.end_date)
         if conflict:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Conflict: Equipment '{equipment.name}' is already reserved between "
-                    f"{conflict.start_date.strftime('%Y-%m-%d %H:%M')} and "
-                    f"{conflict.end_date.strftime('%Y-%m-%d %H:%M')}."
-                ),
-            )
-
-        # 3. Calculation of duration & financial terms
-        duration_seconds = (reservation_in.end_date - reservation_in.start_date).total_seconds()
-        total_days = max(1, math.ceil(duration_seconds / 86400))
-
-        daily_price = float(equipment.price_per_day)
-        delivery_fee = float(equipment.delivery_fee or 0.0)
-        hold_amount = float(equipment.deposit or 0.0)
-        total_price = (total_days * daily_price) + delivery_fee
-
-        try:
-            # 4. Create reservation record
-            new_reservation = EquipmentReservation(
-                equipment_id=equipment.id,
-                renter_id=renter_id,
-                start_date=reservation_in.start_date,
-                end_date=reservation_in.end_date,
-                total_days=total_days,
-                daily_price=daily_price,
-                total_price=total_price,
-                hold_amount=hold_amount,
-                delivery_fee=delivery_fee,
-                status="reserved",
-                pickup_location=reservation_in.pickup_location or equipment.pickup_location,
-                return_location=reservation_in.return_location or equipment.return_location,
-                notes=reservation_in.notes,
-                payment_cleared=False,
-            )
-            db.add(new_reservation)
-
-            # 5. Transition equipment status to 'reserved'
-            equipment.status = "reserved"
-
-            db.commit()
-            db.refresh(new_reservation)
-
-            return ReservationService._to_response(db, new_reservation, equipment)
-
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to create reservation: {str(e)}",
-            )
+            raise HTTPException(status_code=409, detail="Equipment is already reserved for the selected dates")
+        days = max(1, math.ceil((reservation_in.end_date - reservation_in.start_date).total_seconds() / 86400))
+        item = EquipmentReservation(
+            equipment_id=equipment.equipment_id,
+            renter_provider_id=renter_id,
+            start_datetime=reservation_in.start_date,
+            end_datetime=reservation_in.end_date,
+            daily_rate_snapshot=equipment.daily_rate,
+            total_cost=days * equipment.daily_rate,
+            status=ReservationStatus.RESERVED,
+        )
+        equipment.status = EquipmentStatus.RESERVED
+        db.add(item)
+        db.commit()
+        db.refresh(item)
+        return cls._to_response(db, item, equipment)
 
     @classmethod
-    def update_reservation_status(
-        cls,
-        db: Session,
-        reservation_id: int,
-        status_in: ReservationStatusUpdate,
-        user_id: int,
-    ) -> ReservationResponse:
-        """
-        Status Lifecycle Transaction Handling:
-        Handles valid transitions:
-        - reserved -> in_rent (Check-out / Pickup)
-        - in_rent -> return_pending (Return initiated)
-        - return_pending -> returned (Checked in & verified by provider)
-        - reserved -> cancelled (Booking cancelled)
-        """
+    def update_reservation_status(cls, db: Session, reservation_id: int, status_in: ReservationStatusUpdate, user_id: int):
         new_status = status_in.status.lower()
         if new_status not in cls.VALID_STATUSES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid status '{new_status}'. Allowed values: {cls.VALID_STATUSES}",
-            )
-
-        reservation = (
-            db.query(EquipmentReservation)
-            .filter(EquipmentReservation.id == reservation_id)
-            .first()
-        )
+            raise HTTPException(status_code=400, detail=f"Invalid status '{new_status}'")
+        reservation = db.query(EquipmentReservation).filter(EquipmentReservation.reservation_id == reservation_id).first()
         if not reservation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Reservation with ID {reservation_id} not found.",
-            )
-
-        equipment = db.query(Equipment).filter(Equipment.id == reservation.equipment_id).first()
-        if not equipment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Associated equipment record not found.",
-            )
-
-        current_status = reservation.status
-
-        # Validate transition paths
-        if current_status == "returned":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Reservation is already finalized as 'returned'.",
-            )
-        if current_status == "cancelled":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Reservation is already cancelled.",
-            )
-
-        try:
-            reservation.status = new_status
-            if status_in.notes:
-                reservation.notes = f"{reservation.notes or ''}\n[{new_status.upper()}]: {status_in.notes}".strip()
-
-            # Lifecycle mapping to equipment status
-            if new_status == "in_rent":
-                equipment.status = "in_rent"
-            elif new_status == "return_pending":
-                equipment.status = "return_pending"
-            elif new_status == "returned":
-                # Equipment is checked in, return to available
-                equipment.status = "available"
-                reservation.payment_cleared = True
-            elif new_status == "cancelled":
-                # Check if there are other active reservations; if none, equipment returns to available
-                has_other_active = (
-                    db.query(EquipmentReservation)
-                    .filter(
-                        EquipmentReservation.equipment_id == equipment.id,
-                        EquipmentReservation.id != reservation.id,
-                        EquipmentReservation.status.in_(["reserved", "in_rent"]),
-                    )
-                    .first()
-                )
-                if not has_other_active:
-                    equipment.status = "available"
-
-            db.commit()
-            db.refresh(reservation)
-            return cls._to_response(db, reservation, equipment)
-
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update reservation status: {str(e)}",
-            )
+            raise HTTPException(status_code=404, detail="Reservation not found")
+        equipment = db.query(Equipment).filter(Equipment.equipment_id == reservation.equipment_id).first()
+        reservation.status = ReservationStatus(new_status)
+        if new_status == "in_rent":
+            equipment.status = EquipmentStatus.IN_RENT
+        elif new_status == "return_pending":
+            equipment.status = EquipmentStatus.RETURN_PENDING
+        elif new_status in {"returned", "cancelled"}:
+            equipment.status = EquipmentStatus.AVAILABLE
+        db.commit()
+        db.refresh(reservation)
+        return cls._to_response(db, reservation, equipment)
 
     @classmethod
-    def get_user_reservations(cls, db: Session, user_id: int) -> List[ReservationResponse]:
-        reservations = (
-            db.query(EquipmentReservation)
-            .filter(EquipmentReservation.renter_id == user_id)
-            .order_by(EquipmentReservation.id.desc())
-            .all()
-        )
-        return [cls._to_response(db, r) for r in reservations]
+    def get_user_reservations(cls, db: Session, user_id: int):
+        rows = db.query(EquipmentReservation).filter(
+            EquipmentReservation.renter_provider_id == user_id
+        ).order_by(EquipmentReservation.reservation_id.desc()).all()
+        return [cls._to_response(db, row) for row in rows]
 
     @classmethod
-    def get_reservation_by_id(cls, db: Session, reservation_id: int) -> Optional[ReservationResponse]:
-        reservation = (
-            db.query(EquipmentReservation)
-            .filter(EquipmentReservation.id == reservation_id)
-            .first()
-        )
-        if not reservation:
-            return None
-        return cls._to_response(db, reservation)
+    def get_reservation_by_id(cls, db: Session, reservation_id: int):
+        row = db.query(EquipmentReservation).filter(EquipmentReservation.reservation_id == reservation_id).first()
+        return cls._to_response(db, row) if row else None
 
     @staticmethod
-    def _to_response(
-        db: Session,
-        reservation: EquipmentReservation,
-        equipment: Optional[Equipment] = None,
-    ) -> ReservationResponse:
-        if not equipment:
-            equipment = (
-                db.query(Equipment).filter(Equipment.id == reservation.equipment_id).first()
-            )
-        renter = db.query(User).filter(User.id == reservation.renter_id).first()
-
+    def _to_response(db: Session, row: EquipmentReservation, equipment: Optional[Equipment] = None):
+        equipment = equipment or db.query(Equipment).filter(Equipment.equipment_id == row.equipment_id).first()
+        renter = db.query(Provider).filter(Provider.provider_id == row.renter_provider_id).first()
+        days = max(1, math.ceil((row.end_datetime - row.start_datetime).total_seconds() / 86400))
         return ReservationResponse(
-            id=reservation.id,
-            equipment_id=reservation.equipment_id,
-            equipment_name=equipment.name if equipment else "Unknown Equipment",
-            renter_id=reservation.renter_id,
-            renter_name=renter.name if renter else "Customer",
-            start_date=reservation.start_date,
-            end_date=reservation.end_date,
-            total_days=reservation.total_days,
-            daily_price=float(reservation.daily_price),
-            total_price=float(reservation.total_price),
-            hold_amount=float(reservation.hold_amount or 0.0),
-            delivery_fee=float(reservation.delivery_fee or 0.0),
-            status=reservation.status,
-            pickup_location=reservation.pickup_location,
-            return_location=reservation.return_location,
-            payment_cleared=bool(reservation.payment_cleared),
-            notes=reservation.notes,
-            created_at=reservation.created_at,
-            updated_at=reservation.updated_at,
+            id=row.reservation_id,
+            equipment_id=row.equipment_id,
+            equipment_name=equipment.equipment_name if equipment else None,
+            renter_id=row.renter_provider_id,
+            renter_name=renter.business_name if renter else None,
+            start_date=row.start_datetime,
+            end_date=row.end_datetime,
+            total_days=days,
+            daily_price=float(row.daily_rate_snapshot),
+            total_price=float(row.total_cost),
+            hold_amount=float(equipment.deposit_amount if equipment else 0),
+            delivery_fee=0,
+            status=row.status.value,
+            payment_cleared=row.status == ReservationStatus.RETURNED,
+            created_at=row.created_at,
+            updated_at=None,
         )
