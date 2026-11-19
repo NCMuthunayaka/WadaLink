@@ -61,7 +61,7 @@ export default function RoleSelectionScreen({
           <Card key={option.role} selected={active} onPress={() => setSelected(option.role)}>
             <View style={styles.cardHeader}>
               <View style={styles.iconWrap}>
-                <Icon name={option.icon} size={26} color={colors.primary} />
+                <Icon name={option.icon} size={26} color={active ? colors.secondary : colors.primary} />
               </View>
               <View style={styles.headerText}>
                 <Text variant="headlineSm">{option.title}</Text>
@@ -69,7 +69,7 @@ export default function RoleSelectionScreen({
                   {option.subtitle}
                 </Text>
               </View>
-              {active ? <Icon name="check-circle" size={24} color={colors.primary} /> : null}
+              {active ? <Icon name="check-circle" size={24} color={colors.secondary} /> : null}
             </View>
             <Text variant="bodyMd" color={colors.textSecondary} style={styles.description}>
               {option.description}

@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import Text from '@/components/ui/Text';
-import { colors, gradients, radius, sizes, spacing } from '@/constants/theme';
+import { colors, gradients, radius, shadow, sizes, spacing } from '@/constants/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'ai';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -92,6 +92,8 @@ export default function Button({
         styles.base,
         v.container,
         s.container,
+        variant === 'primary' && shadow.sm,
+        variant === 'ai' && shadow.sm,
         fullWidth && styles.fullWidth,
         pressed && styles.pressed,
         isDisabled && styles.disabled,
