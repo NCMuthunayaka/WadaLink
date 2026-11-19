@@ -51,7 +51,7 @@ def create_equipment_listing(
     Provider adds a new equipment listing to their fleet.
     """
     equipment = EquipmentService.create_equipment(db=db, equipment_in=equipment_in, owner_id=owner_id)
-    return equipment
+    return EquipmentService._response(equipment)
 
 
 @router.get("/fleet", response_model=List[EquipmentResponse])
@@ -114,7 +114,7 @@ def update_equipment(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Equipment not found or not owned by user",
         )
-    return updated
+    return EquipmentService._response(updated)
 
 
 @router.delete("/{equipment_id}", status_code=status.HTTP_204_NO_CONTENT)
