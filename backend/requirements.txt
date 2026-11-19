@@ -3,9 +3,10 @@ uvicorn[standard]
 sqlalchemy
 alembic
 pydantic
+email-validator
 psycopg[binary]
-python-jose[cryptography]
-passlib[bcrypt]
+PyJWT
+pwdlib[argon2]
 httpx
 pytest
 python-dotenv

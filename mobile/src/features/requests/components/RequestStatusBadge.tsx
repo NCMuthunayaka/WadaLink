@@ -29,5 +29,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(19, 27, 46, 0.06)',
   },
 });

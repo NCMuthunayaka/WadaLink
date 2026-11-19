@@ -18,7 +18,9 @@ export default function ErrorState({
 }: ErrorStateProps) {
   return (
     <View style={styles.container}>
-      <Icon name="error-outline" size={48} color={colors.danger} />
+      <View style={styles.errorIcon}>
+        <Icon name="error-outline" size={34} color={colors.danger} />
+      </View>
       <Text variant="headlineSm" style={styles.title}>
         {title}
       </Text>
@@ -39,6 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   title: { marginTop: spacing.base },
+  errorIcon: { width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.dangerLight },
   message: { marginTop: spacing.xs, textAlign: 'center' },
   button: { marginTop: spacing.xl },
 });

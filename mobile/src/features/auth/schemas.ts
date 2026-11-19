@@ -21,9 +21,15 @@ export const registerSchema = z
     phone: z
       .string()
       .trim()
-      .max(20, 'Phone number is too long')
-      .regex(/^[+0-9 ()-]*$/, 'Use digits, spaces and + ( ) - only'),
-    password: z.string().min(8, 'Use at least 8 characters').max(128, 'Use at most 128 characters'),
+      .refine((value) => value === '' || /^[1-9]\d{8}$/.test(value), 'Enter exactly 9 digits after +94; do not include the local 0'),
+    password: z
+      .string()
+      .min(8, 'Use at least 8 characters')
+      .max(128, 'Use at most 128 characters')
+      .regex(/[A-Z]/, 'Add at least one uppercase letter')
+      .regex(/[a-z]/, 'Add at least one lowercase letter')
+      .regex(/\d/, 'Add at least one number')
+      .regex(/[^A-Za-z0-9]/, 'Add at least one special character'),
     confirmPassword: z.string(),
   })
   .refine((v) => v.password === v.confirmPassword, {
