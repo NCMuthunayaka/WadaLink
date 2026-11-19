@@ -44,13 +44,13 @@ export const colors = {
   infoLight: '#CFFAFE',
 
   // Surfaces
-  bg: '#FAF8FF', // app canvas (Level 0)
+  bg: '#F4F8FC', // calm blue-tinted app canvas (Level 0)
   surface: '#FFFFFF', // cards and sheets (Level 1)
   surfaceElevated: '#FFFFFF',
-  surfaceLow: '#F2F3FF',
-  surfaceContainer: '#EAEDFF',
-  surfaceHigh: '#E2E7FF',
-  surfaceHighest: '#DAE2FD',
+  surfaceLow: '#F1F6FA',
+  surfaceContainer: '#E7EFF5',
+  surfaceHigh: '#DCE8F0',
+  surfaceHighest: '#D3E2EC',
   dark: '#0F172A', // dispatch tracking bar, inverted panels
 
   // Borders

@@ -47,7 +47,7 @@ export default function MyRequestsScreen({ navigation }: CustomerTabScreenProps<
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Icon name="assignment" size={40} color={colors.borderStrong} />
+              <View style={styles.emptyIcon}><Icon name="assignment" size={32} color={colors.secondary} /></View>
               <Text variant="headlineSm">No requests yet</Text>
               <Text variant="bodyMd" color={colors.textMuted} style={styles.emptyText}>
                 Describe a problem and we will match you with verified providers.
@@ -70,5 +70,6 @@ const styles = StyleSheet.create({
   list: { padding: spacing.base, flexGrow: 1 },
   separator: { height: spacing.md },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm, padding: spacing.xl },
+  emptyIcon: { width: 68, height: 68, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.secondaryContainer, marginBottom: spacing.sm },
   emptyText: { textAlign: 'center', marginBottom: spacing.base },
 });

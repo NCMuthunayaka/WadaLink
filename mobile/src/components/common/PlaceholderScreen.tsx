@@ -13,7 +13,7 @@ export default function PlaceholderScreen({ title, icon }: PlaceholderScreenProp
   return (
     <View style={styles.container}>
       <View style={styles.iconWrap}>
-        <Icon name={icon} size={32} color={colors.primary} />
+        <Icon name={icon} size={32} color={colors.secondary} />
       </View>
       <Text variant="headlineMd">{title}</Text>
       <Text variant="bodyMd" color={colors.textMuted} style={styles.sub}>
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryLight,
+    backgroundColor: colors.secondaryContainer,
     marginBottom: spacing.base,
   },
   sub: { marginTop: spacing.xs },
