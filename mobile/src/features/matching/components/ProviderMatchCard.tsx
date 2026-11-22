@@ -5,6 +5,7 @@ import Card from '@/components/ui/Card';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import Rating from '@/components/ui/Rating';
 import Text from '@/components/ui/Text';
+import Button from '@/components/ui/Button';
 import { colors, radius, spacing } from '@/constants/theme';
 import type { MatchComponent, MatchedProvider } from '@/types/provider';
 import { formatCurrency, formatDistance, formatResponse } from '@/utils/format';
@@ -16,6 +17,7 @@ interface ProviderMatchCardProps {
   provider: MatchedProvider;
   weights: Record<MatchComponent, number>;
   badges?: string[];
+  onSelect?: () => void;
 }
 
 function Metric({ icon, label, value }: { icon: IconName; label: string; value: string }) {
@@ -33,7 +35,7 @@ function Metric({ icon, label, value }: { icon: IconName; label: string; value: 
   );
 }
 
-export default function ProviderMatchCard({ provider, weights, badges = [] }: ProviderMatchCardProps) {
+export default function ProviderMatchCard({ provider, weights, badges = [], onSelect }: ProviderMatchCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -109,6 +111,7 @@ export default function ProviderMatchCard({ provider, weights, badges = [] }: Pr
           ))}
         </View>
       ) : null}
+      {onSelect ? <Button label="Compare quotations" variant="secondary" fullWidth onPress={onSelect} /> : null}
     </Card>
   );
 }

@@ -113,6 +113,7 @@ export default function MatchingProvidersScreen({
             provider={item}
             weights={data.weights}
             badges={badges.get(item.providerId)}
+            onSelect={() => navigation.navigate('QuotationComparison', { requestId })}
           />
         )}
         ListEmptyComponent={

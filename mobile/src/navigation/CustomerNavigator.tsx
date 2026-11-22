@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MatchingProvidersScreen from '@/features/matching/screens/MatchingProvidersScreen';
+import QuotationComparisonScreen from '@/features/quotations/screens/QuotationComparisonScreen';
 import AIResultScreen from '@/features/requests/screens/AIResultScreen';
 import CreateRequestScreen from '@/features/requests/screens/CreateRequestScreen';
 import CustomerTabs from '@/navigation/CustomerTabs';
@@ -16,6 +17,7 @@ export default function CustomerNavigator() {
       <Stack.Screen name="CreateRequest" component={CreateRequestScreen} />
       <Stack.Screen name="AIResult" component={AIResultScreen} />
       <Stack.Screen name="MatchingProviders" component={MatchingProvidersScreen} />
+      <Stack.Screen name="QuotationComparison" component={QuotationComparisonScreen} />
     </Stack.Navigator>
   );
 }
