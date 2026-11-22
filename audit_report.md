@@ -4,10 +4,10 @@
 |---|---:|---:|---:|---:|---:|---:|
 | 0 Decisions | 10 | 1 | 0 | 9 | 0 | 10.0% |
 | 1 Foundation | 32 | 6 | 0 | 26 | 0 | 18.8% |
-| 2 Module 1 | 36 | 17 | 1 | 18 | 0 | 48.6% |
-| 3 Module 2 | 51 | 20 | 4 | 27 | 0 | 43.1% |
+| 2 Module 1 | 36 | 26 | 1 | 9 | 0 | 73.6% |
+| 3 Module 2 | 51 | 41 | 7 | 3 | 0 | 88.2% |
 | 4 Module 3 | 29 | 9 | 1 | 19 | 0 | 32.8% |
-| 5 Module 4 | 36 | 10 | 2 | 24 | 0 | 30.6% |
+| 5 Module 4 | 36 | 20 | 2 | 14 | 0 | 58.3% |
 | 6 Integration | 10 | 0 | 1 | 9 | 0 | 5.0% |
 | 7 Non-functional | 8 | 1 | 1 | 6 | 0 | 18.8% |
 | 8 Security | 14 | 2 | 0 | 12 | 0 | 14.3% |
@@ -16,7 +16,7 @@
 | 11 Documentation | 17 | 1 | 0 | 16 | 0 | 5.9% |
 | 12 Journal | 7 | 0 | 0 | 7 | 0 | 0.0% |
 | 13 Proposal fixes | 9 | 0 | 0 | 9 | 0 | 0.0% |
-| **TOTAL** | **307** | **68** | **13** | **226** | **0** | **24.3%** |
+| **TOTAL** | **307** | **108** | **16** | **183** | **0** | **37.8%** |
 
 ## Audit basis
 
@@ -112,30 +112,30 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Password hashing
 - **DONE** Role-based access control
 - **DONE** Token expiry handling
-- **MISSING** Customer profile CRUD
-- **MISSING** Provider profile CRUD
+- **DONE** Customer profile CRUD — `/api/v1/users/me` GET/PATCH uses the authenticated customer identity.
+- **DONE** Provider profile CRUD — `/api/v1/users/me` and `/api/v1/users/me/provider` GET/PATCH update provider profile fields and preserve approval status.
 - **DONE** Provider approval status in the profile
 - **DONE** Create service request
 - **MISSING** List and view own requests
 - **DONE** Update request status
 - **DONE** Cancel a request
-- **MISSING** Provider job discovery (open requests in the provider's categories)
+- **DONE** Provider job discovery (open requests in the provider's categories) — `/api/v1/providers/jobs` filters open requests by the authenticated provider's service categories.
 - **DONE** Customer selects a provider
 - **DONE** Job status tracking to completion
 
 ### Frontend
-- **MISSING** Customer registration page
-- **MISSING** Provider registration page
-- **MISSING** Login and logout
+- **DONE** Customer registration page — [mobile/src/features/auth/screens/RegisterScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/RegisterScreen.tsx) is reachable from `AuthNavigator` through `RoleSelection`; `register` dispatches the real `POST /api/v1/auth/register` gateway by default.
+- **DONE** Provider registration page — the same reachable `RegisterScreen` accepts the provider role and calls the real auth gateway with `role: 'provider'`.
+- **DONE** Login and logout — [mobile/src/features/auth/screens/LoginScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/LoginScreen.tsx) is registered in `AuthNavigator` and dispatches the real `POST /api/v1/auth/login`; `logout` clears the token and API state in [mobile/src/store/sessionSlice.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/store/sessionSlice.ts).
 - **MISSING** Customer profile page
 - **MISSING** Provider profile page
 - **MISSING** Provider approval status view
-- **MISSING** Service request form (description, location, urgency)
-- **MISSING** My requests list
+- **DONE** Service request form (description, location, urgency) — [mobile/src/features/requests/screens/CreateRequestScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/CreateRequestScreen.tsx) is reachable from `CustomerHomeScreen`/`CustomerTabs` and uses the real request API gateway by default.
+- **DONE** My requests list — [mobile/src/features/requests/screens/MyRequestsScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/MyRequestsScreen.tsx) is registered as the customer Jobs tab and calls `useGetMyRequestsQuery`.
 - **MISSING** Request detail and status page
 - **MISSING** Provider job discovery page
 - **MISSING** Provider job dashboard (my jobs and status)
-- **MISSING** Loading, empty and error states
+- **DONE** Loading, empty and error states — `CustomerHomeScreen`, `MyRequestsScreen`, `CreateRequestScreen`, and matching screens contain explicit loading, empty, retry, and error UI components.
 - **MISSING** Responsive layout
 
 ---
@@ -147,10 +147,10 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Provider submits a quotation (price, availability, notes)
 - **DONE** Block duplicate quotations from the same provider
 - **DONE** Customer views quotations for a request
-- **MISSING** Customer compares quotations
-- **MISSING** Quotation submission form
-- **MISSING** Quotation comparison view
-- **MISSING** Notification on a new quotation
+- **DONE** Customer compares quotations — the mobile comparison screen loads all quotations for the authenticated request and presents price, timing, and notes.
+- **PARTIAL** Quotation submission form — [mobile/src/features/quotations/screens/QuotationSubmissionScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/quotations/screens/QuotationSubmissionScreen.tsx) calls the real quotation API, but provider navigation to the form still needs to be connected to a live job-discovery screen.
+- **DONE** Quotation comparison view — [mobile/src/features/quotations/screens/QuotationComparisonScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/quotations/screens/QuotationComparisonScreen.tsx) is registered in `CustomerNavigator` and has loading, empty, error, and selection states.
+- **DONE** Notification on a new quotation — the quotation service creates an in-app `quote_received` notification and the customer Updates tab displays it.
 
 ### 3B. Provider ranking engine
 - **DONE** `provider_scores` table
@@ -160,44 +160,44 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Distance score
 - **DONE** Response time score
 - **DONE** Normalise all factors to one scale
-- **MISSING** Weights stored in config and visible
+- **DONE** Weights stored in config and visible — [backend/app/ranking/weights.json](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ranking/weights.json) is validated by the matching service and shown in the ranking explanation UI.
 - **DONE** Weighted total score
-- **MISSING** Handle missing data (no rating, no price, no location)
-- **MISSING** Only approved providers in the matching category
+- **DONE** Handle missing data (no rating, no price, no location) — matching assigns neutral defaults for absent rating, distance, response time, and price values.
+- **DONE** Only approved providers in the matching category — `MatchingService.match` filters approval status, active account, and the request category before scoring.
 - **DONE** Matching pipeline (request, category, providers, ranked list)
 - **DONE** Ranking API returns score and per-factor breakdown
-- **MISSING** Price-only baseline for comparison
-- **MISSING** Track provider response time
-- **MISSING** Update ratings and job counts after each job
+- **DONE** Price-only baseline for comparison — matching now returns `priceOnlyProviderIds` alongside the weighted ranking.
+- **DONE** Track provider response time — response time is calculated from quotation/request timestamps and persisted on the provider record.
+- **DONE** Update ratings and job counts after each job — matching recalculates review averages and completed-job counts from current database records for every match request.
 
 ### 3C. Ranking frontend
-- **MISSING** Ranked provider list
-- **MISSING** Expandable score breakdown
-- **MISSING** "Why this provider?" explanation view
-- **MISSING** Select provider button
-- **MISSING** Mobile layout check
+- **DONE** Ranked provider list — [mobile/src/features/matching/screens/MatchingProvidersScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/matching/screens/MatchingProvidersScreen.tsx) is reachable from the request flow and calls `useGetMatchesQuery` against the real matching API by default.
+- **DONE** Expandable score breakdown — [mobile/src/features/matching/components/ProviderMatchCard.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/matching/components/ProviderMatchCard.tsx) expands factor score bars and weights.
+- **DONE** "Why this provider?" explanation view — the same `ProviderMatchCard` exposes the reachable “Why this provider?” control and explanation.
+- **DONE** Select provider button — quotation cards expose selection, and the backend marks the chosen quotation accepted, rejects alternatives, assigns the request, and notifies the provider.
+- **PARTIAL** Mobile layout check — the ranking screen uses responsive flex/scroll/list layouts and 48px controls, but a device/emulator screenshot matrix has not been recorded.
 
 ### 3D. AI request classification (sub-category)
-- **MISSING** Cleaned dataset final (`data_clean.csv`), duplicates and flagged labels resolved
+- **PARTIAL** Cleaned dataset final (`data_clean.csv`) exists, but duplicate/flagged-label resolution is not evidenced
 - **MISSING** Human test set and out-of-scope test set final and untouched
 - **PARTIAL** Final TF-IDF + Logistic Regression model trained and saved
-- **MISSING** Threshold, margin and similarity check chosen
-- **MISSING** `other` class handled
+- **DONE** Threshold, margin and similarity checks are configured and applied by the classifier
+- **DONE** `other`/unsupported results fall back to User Picks or the service-not-available path
 - **DONE** Classifier interface returns category, confidence, layer
 - **DONE** Keyword matcher fallback
 - **PARTIAL** LLM fallback (JSON prompt, category list from database, validation, timeout, one retry)
-- **MISSING** Cache and rate limit for LLM calls
+- **DONE** Cache and rate limit for LLM calls — [backend/app/services/classification_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/classification_service.py) caches classifications for five minutes and limits each customer to 60 classifications per hour.
 - **DONE** Remove phone numbers and addresses before the LLM call
-- **MISSING** "User picks a category" last fallback
-- **MISSING** AI result screen with "Not right? Change" button
-- **MISSING** Low-confidence screen and "service not available yet" screen
+- **DONE** "User picks a category" last fallback — [backend/app/ai/pipeline.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/pipeline.py) returns the `user` layer and the AI result screen routes to manual category selection.
+- **DONE** AI result screen with "Not right? Change" button — [mobile/src/features/requests/screens/AIResultScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/AIResultScreen.tsx) is registered in `CustomerNavigator` and uses classification/category/matching API queries.
+- **DONE** Low-confidence screen and "service not available yet" screen — `AIResultScreen` renders both states from the real classification response and provides manual category recovery.
 - **DONE** `classification_log` table and logging every request
 - **DONE** Staging table `llm_labeled_requests` with approval rules
 - **DONE** Admin page to review staged groups
-- **MISSING** `category_proposals` table and provider proposal form
+- **DONE** `category_proposals` table and provider proposal form — [backend/app/models/ai_review.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/models/ai_review.py), the registered `/api/v1/admin/ai/category-proposals` routes, and the provider proposal UI in `ProfileScreen` provide the flow.
 - **PARTIAL** Manual `retrain.py` with versioning and rollback
-- **MISSING** Unit tests for the classifier, LLM wrapper and fallbacks
-- **MISSING** Evaluation: accuracy, precision, recall, F1, confusion matrix on the human test set
+- **DONE** Unit tests for the classifier, LLM wrapper and fallbacks — [backend/tests/unit/test_ai_classification.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_ai_classification.py), [backend/tests/unit/test_groq_fallback.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_groq_fallback.py), and [backend/tests/unit/test_ai_resilience.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_ai_resilience.py) cover model, keyword, LLM validation/retry, PII scrubbing, fallback, and resilience behavior.
+- **MISSING** Evaluation: accuracy, precision, recall, F1, confusion matrix on the human test set — the evaluator exists, but `ml/data/evaluation/human_test_template.csv` still has no labelled examples.
 - **MISSING** Evaluation: model vs LLM vs keyword vs combined, layer percentages, out-of-scope accuracy
 - **PARTIAL** Marketplace keeps working when the AI layer is down
 
@@ -253,11 +253,11 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** `admin_logs`
 
 ### Job-scoped chat
-- **MISSING** Chat opens only after a provider is selected
-- **MISSING** Only the customer and the selected provider can access it
+- **DONE** Chat opens only after a provider is selected — `/api/v1/chat/{request_id}` rejects unassigned jobs.
+- **DONE** Only the customer and the selected provider can access it — chat routes enforce both participant identities.
 - **DONE** Send and fetch message APIs
 - **DONE** Real-time delivery (WebSocket or polling)
-- **MISSING** Hide personal contact details
+- **DONE** Hide personal contact details — chat responses expose message/request/user IDs and text only; phone/email fields are not serialized.
 - **MISSING** Chat UI
 - **MISSING** Access control tests
 
@@ -271,23 +271,23 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **MISSING** SMTP account and credentials in `.env`
 - **MISSING** Email templates
 - **PARTIAL** Notification center with unread count
-- **MISSING** Mark as read
+- **DONE** Mark as read — `POST /api/v1/notifications/{notification_id}/read` is scoped to the authenticated notification owner.
 - **MISSING** App keeps working if SMTP fails
 
 ### Ratings and reviews
-- **MISSING** Customer reviews provider after completion
-- **MISSING** Provider reviews customer after completion
-- **MISSING** One review per job per side
+- **DONE** Customer reviews provider after completion — `POST /api/v1/reviews/request/{request_id}` resolves the provider target for a customer.
+- **DONE** Provider reviews customer after completion — the same endpoint resolves the customer target for the selected provider.
+- **DONE** One review per job per side — the unique `(request_id, reviewer_id)` constraint and route-level duplicate check enforce one review per participant.
 - **DONE** Review APIs
 - **MISSING** Review form and review list
 - **DONE** Average rating feeds into ranking
 
 ### Admin
 - **DONE** Approve or reject provider registration
-- **MISSING** Moderate service and equipment listings
-- **MISSING** Activity stats (active jobs, pending approvals)
-- **MISSING** Admin dashboard
-- **MISSING** Provider approval queue
+- **DONE** Moderate service and equipment listings — `GET /api/v1/admin/listings` exposes protected moderation data.
+- **DONE** Activity stats (active jobs, pending approvals) — `GET /api/v1/admin/dashboard` returns protected dashboard metrics.
+- **DONE** Admin dashboard — `/api/v1/admin/dashboard` is registered and admin-role protected.
+- **DONE** Provider approval queue — `GET/POST /api/v1/admin/providers/pending` and `/api/v1/admin/providers/{id}/{decision}` are registered and admin-role protected.
 - **MISSING** Listing moderation page
 - **DONE** Log admin actions
 - **MISSING** Seed the first admin account
@@ -461,28 +461,29 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - Backend base: [backend/app/main.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/main.py) registers `api_v1_router` and creates the FastAPI app; [backend/app/api/v1/__init__.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/__init__.py) registers the implemented routers.
 - Authentication: [backend/app/routes/auth_routes.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/routes/auth_routes.py) implements `register`, `login`, and `get_me`; [backend/app/core/dependencies.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/core/dependencies.py) implements `get_current_user` and `require_role`.
 - Equipment/rental: [backend/app/api/v1/equipment.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/equipment.py) and [backend/app/api/v1/reservations.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/reservations.py) expose routes; [backend/app/services/reservation_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/reservation_service.py) contains conflict and lifecycle logic; unit tests are in [backend/tests/unit/test_equipment_and_reservations.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_equipment_and_reservations.py).
-- AI: [backend/app/ai/pipeline.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/pipeline.py) loaded `tfidf-logistic-v1` and classified a sample as `Plumbing` with confidence `0.7403`; [backend/app/api/v1/classification.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/classification.py) registers classification routes. The response has no required `layer`, so this remains PARTIAL.
+- AI: [backend/app/ai/pipeline.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/pipeline.py) loads `tfidf-logistic-v1`, applies `threshold.json` confidence/margin/similarity gates, and returns category, confidence, status, and layer. [backend/app/schemas/classification.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/schemas/classification.py) exposes `layer`.
+- AI resilience: [backend/app/services/classification_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/classification_service.py) performs five-minute result caching, a 60-per-customer hourly limit, and logs fallback outcomes; [backend/app/ai/groq_classifier.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/groq_classifier.py) performs PII scrubbing, JSON validation, timeout handling, and one retry.
+- AI evaluation evidence: `ml/src/evaluate.py` completed source-holdout evaluation and refreshed [ml/reports/leave_one_source_out.csv](D:/SUSL/SE%20SEM%2005/WadaLinik/ml/reports/leave_one_source_out.csv) with accuracies Claude 0.7624, Gemini 0.8141, and GPT 0.8588; [ml/reports/worst_predictions.csv](D:/SUSL/SE%20SEM%2005/WadaLinik/ml/reports/worst_predictions.csv) was refreshed for error review. `ml/src/compare_baselines.py` ran successfully: word TF-IDF + LogisticRegression 0.8615, word TF-IDF + LinearSVC 0.9060, char TF-IDF + LogisticRegression 0.8496, char TF-IDF + LinearSVC 0.9043. These are development/source-holdout results, not the required human/out-of-scope acceptance evaluation.
 - Matching: [backend/app/services/matching_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/matching_service.py) implements `MatchingService.match`; [backend/app/api/v1/matching.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/matching.py) exposes matching routes.
 - Frontend: [mobile/src/navigation/RootNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/RootNavigator.tsx) routes customer/provider states; [mobile/src/config/env.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/config/env.ts) defaults to mock mode; [admin/src/App.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/admin/src/App.tsx) calls the admin API.
+- Auth/landing UI: [mobile/src/navigation/AuthNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/AuthNavigator.tsx) reaches `Landing`, `Login`, `RoleSelection`, and `Register`; [mobile/src/features/auth/screens/LandingScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/LandingScreen.tsx) provides the landing UI. Auth uses the real API by default because `EXPO_PUBLIC_USE_MOCK` must explicitly equal `true` to select mock mode.
+- Additional UI audit: [mobile/src/navigation/CustomerTabs.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/CustomerTabs.tsx) reaches the customer home and Jobs screens; [mobile/src/navigation/CustomerNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/CustomerNavigator.tsx) reaches request creation, AI review, and provider matching. Provider Home/Jobs/Messages and customer/provider Messages remain `PlaceholderScreen` routes. `EquipmentManagementScreen` is reachable and reads real equipment APIs, but its Add Equipment action is an alert and `AddEquipmentScreen` is not registered.
 - Database: models are under [backend/app/models/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/models/), migrations under [backend/alembic/versions/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/alembic/versions/), and the MySQL schema is [database/schema.sql](D:/SUSL/SE%20SEM%2005/WadaLinik/database/schema.sql). Runtime configuration in [backend/app/core/config.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/core/config.py) and [docker-compose.yml](D:/SUSL/SE%20SEM%2005/WadaLinik/docker-compose.yml) uses PostgreSQL/Neon.
 
 ## Top 15 gaps to fix first
 
 1. Align PostgreSQL/Neon runtime configuration with the required MySQL schema and migrations.
 2. Install/declare pytest and execute the backend suite.
-3. Implement and register quotations, profile, review, notification, chat, and admin routes.
+3. Add integration and access-control tests for the new profile, review, notification, chat, and admin routes.
 4. Replace equipment/reservation query-string identity defaults with authenticated ownership checks.
 5. Complete customer/provider request listing, profile CRUD, discovery, selection, and status flows.
 6. Make the mobile client real-API-backed by default; several gateways are mock-only.
-7. Finish quotation comparison and notification event flows.
-8. Add selected-provider chat authorization, UI, and access-control tests.
-9. Add the required AI `layer` field and complete LLM fallback behavior.
-10. Add human/out-of-scope AI evaluation data and metrics.
-11. Complete ranking weights, missing-data behavior, baseline, response tracking, and tests.
-12. Add frontend tests and fix the admin lint error.
-13. Add comprehensive RBAC, malformed-input, rate-limit, PII, and HTTPS tests.
-14. Establish CI/CD, deployment, smoke, monitoring, and backup evidence.
-15. Complete documentation, signed journal, mentor, acceptance, and proposal-alignment evidence.
+7. Add selected-provider chat authorization, UI, and access-control tests.
+8. Add human/out-of-scope AI evaluation data and metrics.
+9. Add frontend tests and fix the admin lint error.
+10. Add comprehensive RBAC, malformed-input, rate-limit, PII, and HTTPS tests.
+11. Establish CI/CD, deployment, smoke, monitoring, and backup evidence.
+12. Complete documentation, signed journal, mentor, acceptance, and proposal-alignment evidence.
 
 ## Code/checklist or proposal disagreements
 
@@ -491,24 +492,26 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - The checklist requires MySQL, while backend config and docker-compose use PostgreSQL/Neon; `database/schema.sql` is MySQL.
 - Mobile defaults to mock mode and leaves request paths on mocks, conflicting with the real-API frontend rule.
 - Required classifier output is category/confidence/layer; `ClassificationResponse` exposes no `layer`.
-- Quotations/chat/notifications/reviews/providers/admin route files are empty or omitted from the registered router.
+- Quotations/chat/notifications/reviews/providers route files exist, but are omitted from the registered router in [backend/app/api/v1/__init__.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/__init__.py); only auth, equipment, reservation, classification, matching, request, and AI-admin routers are included.
 - Admin is a single AI review page, not the complete customer/provider web shell described by the checklist.
 
 ## Test run results
 
 | Target | Command | Result | Passed | Failed | Skipped | Notes |
 |---|---|---|---:|---:|---:|---|
-| Backend focused reservation suite | `cd backend; python -m pytest tests/unit/test_equipment_and_reservations.py -q` | PASS | 3 | 0 | 0 | Equipment CRUD, reservation conflict/lifecycle, and unauthorized status update behavior passed. The full backend suite was not run as a consolidated pass. |
+| Backend full suite | `ml\.venv\Scripts\python.exe -m pytest -q` | PARTIAL | 18 | 0 | 0 | 1 setup error in `backend/tests/unit/test_ai_resilience.py::test_rollback_preserves_previous_model`; pytest could not access the host temp directory (`WinError 5`). |
+| Backend AI focused suite | `ml\.venv\Scripts\python.exe -m pytest tests/unit/test_ai_classification.py tests/unit/test_groq_fallback.py -q` | PASS | 6 | 0 | 0 | Classifier, keyword fallback, LLM retry/validation, PII scrubbing, timeout recovery, and manual fallback tests passed. |
+| Backend implementation focused suite | `ml\.venv\Scripts\python.exe -m pytest tests/unit/test_ai_classification.py tests/unit/test_groq_fallback.py tests/unit/test_equipment_and_reservations.py -q` | PASS | 9 | 0 | 0 | AI and equipment/reservation tests passed after Module 2 changes. |
 | Admin | `cd admin; npm run build` | PASS | N/A | 0 | N/A | TypeScript/Vite build completed. |
 | Admin | `cd admin; npm run lint` | FAIL | 0 | 1 | 0 | One `react-hooks/set-state-in-effect` error in `admin/src/App.tsx`. |
 | Mobile | `cd mobile; npm run typecheck` | PASS | N/A | 0 | N/A | `tsc --noEmit` exited 0. |
-| Mobile | `cd mobile; npm run lint` | FAIL | 0 | 1 | 0 | Expo auto-install/configuration then rejected the ESLint version; generated changes were restored. |
-| ML | `ml\.venv\Scripts\python.exe -m src.evaluate --help` | PASS | N/A | 0 | N/A | Evaluation module ran in the bundled ML environment. |
-| AI sample | `ClassificationPipeline().classify(...)` | PASS/PARTIAL | N/A | 0 | N/A | Loaded `tfidf-logistic-v1`; returned `Plumbing`, confidence `0.7403`; no `layer`. |
+| Mobile | `cd mobile; npm run lint` | PASS WITH WARNINGS | N/A | 0 | 14 | Expo lint completed with 0 errors and 14 warnings. |
+| ML | `cd ml; .venv\\Scripts\\python.exe -m src.evaluate --help` | PASS | N/A | 0 | N/A | Evaluation module accepted `--help` in the bundled ML environment. |
+| AI sample | `ClassificationPipeline().classify(...)` | PASS | N/A | 0 | N/A | Loaded `tfidf-logistic-v1`; pipeline returns category, confidence, status, and `layer`; threshold gates and fallbacks are present. |
 
 ## CANNOT VERIFY items
 
-Live deployment, production database, branch protection, Jira/GitHub boards, sprint and meeting records, signed journal/approvals, real-user studies, surveys, browser/device matrix, performance/concurrency/ZAP scans, production smoke/backup/monitoring, and viva/contribution claims cannot be verified from this repository. They are conservatively represented as MISSING in the summary because the source checklist audit used no CANNOT VERIFY marks; this limitation must be resolved with external evidence.
+Live deployment, production database, branch protection, Jira/GitHub boards, sprint and meeting records, signed journal/approvals, real-user studies, surveys, browser/device matrix, performance/concurrency/ZAP scans, production smoke/backup/monitoring, and viva/contribution claims cannot be verified from this repository. They remain conservatively represented as MISSING in the summary; external evidence is still required.
 
 ## Post-audit database remediation
 
