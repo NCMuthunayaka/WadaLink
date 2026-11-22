@@ -64,13 +64,13 @@ export default function CreateRequestScreen({
     if (existing.data && !filled.current) {
       filled.current = true;
       reset({
-        categoryId: existing.data.categoryId ?? '',
+        categoryId: presetCategoryId ?? existing.data.categoryId ?? '',
         description: existing.data.description,
         address: existing.data.address,
         urgency: existing.data.urgency,
       });
     }
-  }, [existing.data, reset]);
+  }, [existing.data, presetCategoryId, reset]);
 
   const descriptionLength = watch('description').length;
 

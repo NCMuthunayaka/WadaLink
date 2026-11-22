@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.models.equipment import Equipment, EquipmentStatus
 from app.models.equipment_reservation import EquipmentReservation, ReservationStatus
-from app.models.provider import Provider
+from app.models.customer import Customer
 from app.schemas.equipment_reservation import ReservationCreate, ReservationResponse, ReservationStatusUpdate
 
 
@@ -30,6 +30,9 @@ class ReservationService:
 
     @classmethod
     def create_reservation(cls, db: Session, reservation_in: ReservationCreate, renter_id: int):
+        renter = db.query(Customer).filter(Customer.customer_id == renter_id).first()
+        if not renter:
+            raise HTTPException(status_code=403, detail="A customer profile is required to rent equipment")
         equipment = db.query(Equipment).filter(Equipment.equipment_id == reservation_in.equipment_id).first()
         if not equipment:
             raise HTTPException(status_code=404, detail="Equipment not found")
@@ -39,7 +42,7 @@ class ReservationService:
         days = max(1, math.ceil((reservation_in.end_date - reservation_in.start_date).total_seconds() / 86400))
         item = EquipmentReservation(
             equipment_id=equipment.equipment_id,
-            renter_provider_id=renter_id,
+            renter_customer_id=renter_id,
             start_datetime=reservation_in.start_date,
             end_datetime=reservation_in.end_date,
             daily_rate_snapshot=equipment.daily_rate,
@@ -61,6 +64,8 @@ class ReservationService:
         if not reservation:
             raise HTTPException(status_code=404, detail="Reservation not found")
         equipment = db.query(Equipment).filter(Equipment.equipment_id == reservation.equipment_id).first()
+        if equipment is None or equipment.owner_provider_id != user_id:
+            raise HTTPException(status_code=403, detail="Only the equipment owner can update this reservation")
         reservation.status = ReservationStatus(new_status)
         if new_status == "in_rent":
             equipment.status = EquipmentStatus.IN_RENT
@@ -75,26 +80,38 @@ class ReservationService:
     @classmethod
     def get_user_reservations(cls, db: Session, user_id: int):
         rows = db.query(EquipmentReservation).filter(
-            EquipmentReservation.renter_provider_id == user_id
+            EquipmentReservation.renter_customer_id == user_id
         ).order_by(EquipmentReservation.reservation_id.desc()).all()
         return [cls._to_response(db, row) for row in rows]
 
     @classmethod
-    def get_reservation_by_id(cls, db: Session, reservation_id: int):
+    def get_reservation_by_id(cls, db: Session, reservation_id: int, user_id: int, user_role: str):
         row = db.query(EquipmentReservation).filter(EquipmentReservation.reservation_id == reservation_id).first()
-        return cls._to_response(db, row) if row else None
+        if not row:
+            return None
+        equipment = db.query(Equipment).filter(Equipment.equipment_id == row.equipment_id).first()
+        is_customer_owner = user_role == "customer" and row.renter_customer_id == user_id
+        is_equipment_owner = (
+            user_role == "provider"
+            and equipment is not None
+            and equipment.owner_provider_id == user_id
+        )
+        if not is_customer_owner and not is_equipment_owner:
+            raise HTTPException(status_code=403, detail="You do not have access to this reservation")
+        return cls._to_response(db, row, equipment)
 
     @staticmethod
     def _to_response(db: Session, row: EquipmentReservation, equipment: Optional[Equipment] = None):
         equipment = equipment or db.query(Equipment).filter(Equipment.equipment_id == row.equipment_id).first()
-        renter = db.query(Provider).filter(Provider.provider_id == row.renter_provider_id).first()
+        renter = db.query(Customer).filter(Customer.customer_id == row.renter_customer_id).first()
+        renter_name = renter.user.full_name if renter and renter.user else None
         days = max(1, math.ceil((row.end_datetime - row.start_datetime).total_seconds() / 86400))
         return ReservationResponse(
             id=row.reservation_id,
             equipment_id=row.equipment_id,
             equipment_name=equipment.equipment_name if equipment else None,
-            renter_id=row.renter_provider_id,
-            renter_name=renter.business_name if renter else None,
+            renter_id=row.renter_customer_id,
+            renter_name=renter_name,
             start_date=row.start_datetime,
             end_date=row.end_datetime,
             total_days=days,

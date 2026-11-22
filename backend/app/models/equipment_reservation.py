@@ -9,8 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, BigIntUnsigned, db_enum
 
 if TYPE_CHECKING:
+    from .customer import Customer
     from .equipment import Equipment
-    from .provider import Provider
     from .service_request import ServiceRequest
 
 
@@ -24,7 +24,7 @@ class ReservationStatus(str, enum.Enum):
 
 
 class EquipmentReservation(Base):
-    """Normalized equipment reservation linked to a provider renter."""
+    """Normalized equipment reservation linked to a customer renter."""
 
     __tablename__ = "equipment_reservations"
     __table_args__ = (
@@ -41,9 +41,9 @@ class EquipmentReservation(Base):
         nullable=False,
         index=True,
     )
-    renter_provider_id: Mapped[int] = mapped_column(
+    renter_customer_id: Mapped[int] = mapped_column(
         BigIntUnsigned,
-        ForeignKey("providers.provider_id", ondelete="RESTRICT", onupdate="CASCADE"),
+        ForeignKey("customers.customer_id", ondelete="RESTRICT", onupdate="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -68,7 +68,7 @@ class EquipmentReservation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     equipment: Mapped["Equipment"] = relationship(back_populates="reservations")
-    renter: Mapped["Provider"] = relationship(back_populates="equipment_reservations")
+    renter: Mapped["Customer"] = relationship(back_populates="equipment_reservations")
     related_request: Mapped[Optional["ServiceRequest"]] = relationship(
         back_populates="equipment_reservations"
     )

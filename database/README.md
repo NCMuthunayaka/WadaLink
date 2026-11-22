@@ -14,9 +14,7 @@ the Alembic revision in `backend/alembic/versions/`. The structure is in 3NF:
 - repeated values such as roles, statuses and categories are not duplicated in
   transaction rows.
 
-Use Alembic as the source of truth. The legacy `schema.sql` file is retained
-for reference and must not be used to create the Neon database because it is
-MySQL-specific.
+Use Alembic as the only schema source of truth for Neon PostgreSQL.
 
 From `backend/` after installing dependencies:
 

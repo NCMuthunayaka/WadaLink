@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, BigIntUnsigned, TimestampMixin
 
 if TYPE_CHECKING:
+    from .equipment_reservation import EquipmentReservation
     from .service_request import ServiceRequest
     from .user import User
 
@@ -31,6 +32,9 @@ class Customer(TimestampMixin, Base):
 
     user: Mapped["User"] = relationship(back_populates="customer")
     service_requests: Mapped[List["ServiceRequest"]] = relationship(back_populates="customer")
+    equipment_reservations: Mapped[List["EquipmentReservation"]] = relationship(
+        back_populates="renter"
+    )
 
     def __repr__(self) -> str:
         return f"<Customer id={self.customer_id}>"
