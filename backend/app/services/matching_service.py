@@ -40,6 +40,9 @@ class MatchingService:
         if request.category_id:
             query = query.filter(Provider.service_categories.any(category_id=request.category_id))
         rows = query.all()
+        price_baseline = [provider.provider_id for provider, _ in sorted(
+            rows, key=lambda pair: (pair[0].hourly_rate is None, float(pair[0].hourly_rate or 0), pair[0].provider_id)
+        )[:20]]
         results = []
         for provider, user in rows:
             rating, count = db.query(func.avg(Review.rating), func.count(Review.review_id)).filter(Review.reviewee_id == provider.provider_id).one()
@@ -76,5 +79,5 @@ class MatchingService:
             db.add(score)
             response.append({"providerId": provider.provider_id, "name": user.full_name, "businessName": provider.business_name, "experienceYears": provider.experience_years, "rating": rating, "reviewCount": count, "verified": provider.approval_status == ApprovalStatus.APPROVED, "distanceKm": distance, "responseMinutes": provider.response_time_minutes, "hourlyRate": float(provider.hourly_rate) if provider.hourly_rate else None, "rank": rank, "score": {"total": total, **{k: v for k, v in components.items()}}})
         db.commit()
-        return {"requestId": request.request_id, "weights": WEIGHTS, "providers": response}
+        return {"requestId": request.request_id, "weights": WEIGHTS, "priceOnlyProviderIds": price_baseline, "providers": response}
 
