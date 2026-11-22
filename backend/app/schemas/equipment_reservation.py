@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ReservationCreate(BaseModel):
@@ -27,6 +27,7 @@ class ReservationStatusUpdate(BaseModel):
 
 
 class ReservationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     equipment_id: int
     equipment_name: Optional[str] = None
@@ -47,5 +48,3 @@ class ReservationResponse(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True

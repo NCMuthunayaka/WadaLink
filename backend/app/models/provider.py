@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, BigIntUnsigned, TimestampMixin, db_enum
@@ -15,6 +15,13 @@ if TYPE_CHECKING:
     from .quotation import Quotation
     from .service_request import ServiceRequest
     from .user import User
+
+provider_service_categories = Table(
+    "provider_service_categories",
+    Base.metadata,
+    Column("provider_id", BigIntUnsigned, ForeignKey("providers.provider_id", ondelete="CASCADE"), primary_key=True),
+    Column("category_id", BigIntUnsigned, ForeignKey("service_categories.category_id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 class ApprovalStatus(str, enum.Enum):
@@ -46,6 +53,9 @@ class Provider(TimestampMixin, Base):
     service_radius_km: Mapped[Decimal] = mapped_column(
         Numeric(8, 2), nullable=False, default=Decimal("10.00"), server_default="10.00"
     )
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 7))
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 7))
+    response_time_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=60, server_default="60")
     approval_status: Mapped[ApprovalStatus] = mapped_column(
         db_enum(ApprovalStatus, "approval_status"),
         nullable=False,
@@ -69,6 +79,9 @@ class Provider(TimestampMixin, Base):
     selected_requests: Mapped[List["ServiceRequest"]] = relationship(back_populates="selected_provider")
     provider_scores: Mapped[List["ProviderScore"]] = relationship(
         back_populates="provider", cascade="all, delete-orphan", passive_deletes=True
+    )
+    service_categories: Mapped[List["ServiceCategory"]] = relationship(
+        secondary=provider_service_categories, back_populates="providers"
     )
     quotations: Mapped[List["Quotation"]] = relationship(
         back_populates="provider", cascade="all, delete-orphan", passive_deletes=True

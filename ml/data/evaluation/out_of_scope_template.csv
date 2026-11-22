@@ -1,0 +1,4 @@
+text,expected_result,notes
+"write a poem about rain",out_of_scope,manual label required
+"what is the capital of France",out_of_scope,manual label required
+"help me plan a holiday",out_of_scope,manual label required
