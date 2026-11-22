@@ -2,11 +2,9 @@ import axios from 'axios';
 import { env } from '@/config/env';
 import { authToken, notifyUnauthorized } from './session';
 
-// Base API URL with environment fallback
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-
+// Keep the legacy client on the same configured URL as the primary HTTP client.
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: env.apiUrl,
   headers: {
     'Content-Type': 'application/json',
   },
