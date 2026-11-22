@@ -1,10 +1,11 @@
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ── Active Rental Representation ─────────────────────────────
 class ActiveRentalInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     renter_name: str
     renter_phone: Optional[str] = None
@@ -14,9 +15,6 @@ class ActiveRentalInfo(BaseModel):
     return_location: Optional[str] = None
     eta: Optional[str] = None
     payment_cleared: bool = False
-
-    class Config:
-        from_attributes = True
 
 
 # ── Equipment Schemas ─────────────────────────────────────────
@@ -54,15 +52,13 @@ class EquipmentUpdate(BaseModel):
 
 
 class EquipmentResponse(EquipmentBase):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     owner_id: int
     status: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     active_rental: Optional[ActiveRentalInfo] = None
-
-    class Config:
-        from_attributes = True
 
 
 # ── Provider Fleet Stats ──────────────────────────────────────
