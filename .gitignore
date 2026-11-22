@@ -9,4 +9,5 @@ dist/
 .vscode/
 .expo/
 *.joblib
+ml/backups/
 .DS_Store

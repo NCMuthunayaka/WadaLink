@@ -3,6 +3,7 @@ import re
 import time
 
 from app.ai.pipeline import ClassificationPipeline
+from app.ai.groq_classifier import scrub_pii
 from app.models.classification_log import ClassificationLog, ClassificationStatus
 from app.models.ai_review import LabeledRequest, ReviewQueueStatus, UnmatchedRequest
 from app.models.service_category import ServiceCategory
@@ -16,16 +17,22 @@ class ClassificationService:
 
     @classmethod
     def classify_request(cls, db: Session, request: ServiceRequest) -> ClassificationLog:
-        cache_key = cls._scrub_pii(f"{request.title} {request.description}".strip()).lower()
+        categories = [row.category_name for row in db.query(ServiceCategory).filter(ServiceCategory.is_active.is_(True)).all()]
+        cache_key = repr((request.customer_id, tuple(sorted(categories)), cls.pipeline.model_name, cls._scrub_pii(f"{request.title} {request.description}".strip()).lower()))
         now = time.time()
         recent = [stamp for stamp in cls._rate.get(request.customer_id, []) if now - stamp < 3600]
-        if len(recent) >= 60:
-            raise ValueError("AI classification rate limit exceeded")
-        recent.append(now)
+        limited = len(recent) >= 60
+        if not limited:
+            recent.append(now)
         cls._rate[request.customer_id] = recent
         cached = cls._cache.get(cache_key)
-        result = cached[1] if cached and now - cached[0] < 300 else cls.pipeline.classify(request.title, request.description)
-        cls._cache[cache_key] = (now, result)
+        if limited:
+            result = cls.pipeline.classify(None, '', categories)
+        else:
+            result = cached[1] if cached and now - cached[0] < 300 else cls.pipeline.classify(request.title, request.description, categories)
+        cls._cache = {key: value for key, value in cls._cache.items() if now - value[0] < 300}
+        if not limited:
+            cls._cache[cache_key] = (now, result)
         category = db.query(ServiceCategory).filter(
             ServiceCategory.category_name.ilike(result["category"]),
             ServiceCategory.is_active.is_(True),
@@ -38,14 +45,14 @@ class ClassificationService:
             predicted_urgency=result["urgency"],
             model_name=result["model_name"],
             model_version=result["model_name"],
-            layer="local_model" if result["model_name"].startswith("tfidf") else "keyword_fallback",
+            layer=result['layer'],
             confidence_score=result["confidence"],
             input_text=cls._scrub_pii(f"{request.title} {request.description}".strip()),
             output_json=result["details"],
             status=ClassificationStatus.SUCCESS if result["status"] == "success" else ClassificationStatus.FALLBACK,
         )
         db.add(log)
-        if result["status"] == "fallback":
+        if result['layer'] == 'llm':
             db.add(LabeledRequest(
                 request_id=request.request_id,
                 input_text=cls._scrub_pii(f"{request.title} {request.description}".strip()),
@@ -53,6 +60,7 @@ class ClassificationService:
                 confidence=result["confidence"],
                 status=ReviewQueueStatus.PENDING,
             ))
+        if result['status'] == 'fallback':
             db.add(UnmatchedRequest(
                 request_id=request.request_id,
                 input_text=cls._scrub_pii(f"{request.title} {request.description}".strip()),
@@ -64,9 +72,7 @@ class ClassificationService:
 
     @staticmethod
     def _scrub_pii(text: str) -> str:
-        text = re.sub(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b", "[email]", text)
-        text = re.sub(r"\b(?:\+?\d[\d\s().-]{7,}\d)\b", "[phone]", text)
-        return text
+        return scrub_pii(text)
 
     @staticmethod
     def response(log: ClassificationLog) -> dict:
@@ -79,6 +85,7 @@ class ClassificationService:
             "confidence": float(log.confidence_score or 0),
             "status": log.status.value,
             "modelName": log.model_name,
+            "layer": log.layer or 'user',
             "details": log.output_json or {},
         }
 

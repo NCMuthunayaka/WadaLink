@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Input from '@/components/ui/Input';
+import { http } from '@/services/api/client';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import Avatar from '@/components/ui/Avatar';
@@ -21,6 +23,19 @@ export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const user = useAppSelector(selectUser);
+  const [proposal, setProposal] = useState('');
+  const [proposalStatus, setProposalStatus] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const submitProposal = async () => {
+    setSubmitting(true);
+    try {
+      await http.post('/admin/ai/category-proposals', { name: proposal.trim() });
+      setProposal('');
+      setProposalStatus('Proposal submitted for admin review.');
+    } catch {
+      setProposalStatus('Could not submit. Check for an existing category or try again.');
+    } finally { setSubmitting(false); }
+  };
 
   const confirmSignOut = () =>
     Alert.alert('Sign out', 'Are you sure you want to sign out?', [
@@ -47,6 +62,11 @@ export default function ProfileScreen() {
         </View>
       </Card>
 
+      {user.role === 'provider' ? <Card>
+        <Input label="Propose a service category" value={proposal} onChangeText={setProposal} />
+        <Button label={submitting ? 'Submitting…' : 'Submit proposal'} disabled={submitting || proposal.trim().length < 2} onPress={() => void submitProposal()} />
+        {proposalStatus ? <Text>{proposalStatus}</Text> : null}
+      </Card> : null}
       <Button label="Sign out" variant="outline" size="lg" fullWidth icon="logout" onPress={confirmSignOut} />
       {__DEV__ ? (
         <Button label="Open UI kit (dev)" variant="ghost" fullWidth onPress={() => navigation.navigate('UIKit')} />

@@ -1,4 +1,6 @@
 from math import asin, cos, radians, sin, sqrt
+import json
+from pathlib import Path
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -7,8 +9,15 @@ from app.models.provider_score import ProviderScore
 from app.models.review import Review
 from app.models.service_request import ServiceRequest
 from app.models.user import User
+from app.models.quotation import Quotation
 
-WEIGHTS = {"rating": 0.35, "proximity": 0.25, "response": 0.15, "price": 0.15, "experience": 0.10}
+WEIGHTS = json.loads((Path(__file__).parents[1] / 'ranking' / 'weights.json').read_text())
+if set(WEIGHTS) != {'rating', 'proximity', 'response', 'price', 'experience'} or any(v < 0 for v in WEIGHTS.values()) or abs(sum(WEIGHTS.values()) - 1) > 1e-9:
+    raise ValueError('Ranking weights must be nonnegative and sum to one')
+
+
+def price_only(providers):
+    return sorted(providers, key=lambda p: (p.hourly_rate is None, float(p.hourly_rate or 0), p.provider_id))
 
 
 def _distance(lat1, lon1, lat2, lon2):
@@ -22,6 +31,8 @@ def _distance(lat1, lon1, lat2, lon2):
 class MatchingService:
     @staticmethod
     def match(db: Session, request: ServiceRequest) -> dict:
+        if request.category_id is None:
+            return {'requestId': request.request_id, 'weights': WEIGHTS, 'providers': []}
         query = db.query(Provider, User).join(User, User.user_id == Provider.provider_id).filter(
             Provider.approval_status == ApprovalStatus.APPROVED,
             User.account_status == "active",
@@ -33,15 +44,20 @@ class MatchingService:
         for provider, user in rows:
             rating, count = db.query(func.avg(Review.rating), func.count(Review.review_id)).filter(Review.reviewee_id == provider.provider_id).one()
             rating = float(rating or 0)
+            completed_jobs = db.query(func.count(ServiceRequest.request_id)).filter(ServiceRequest.selected_provider_id == provider.provider_id, ServiceRequest.status == 'completed').scalar()
+            quotations = db.query(Quotation).filter(Quotation.provider_id == provider.provider_id).all()
+            durations = [max(0, (q.created_at - q.request.created_at).total_seconds() / 60) for q in quotations if q.created_at and q.request.created_at]
+            if durations:
+                provider.response_time_minutes = round(sum(durations) / len(durations))
             distance = _distance(request.latitude, request.longitude, provider.latitude, provider.longitude)
             if distance is not None and distance > float(provider.service_radius_km):
                 continue
             components = {
                 "rating": rating / 5,
-                "proximity": 1 if distance is None else max(0, 1 - distance / max(float(provider.service_radius_km), 1)),
-                "response": max(0, 1 - provider.response_time_minutes / 240),
-                "price": 1 if not provider.hourly_rate or not request.budget_max else max(0, 1 - float(provider.hourly_rate) / float(request.budget_max)),
-                "experience": min(1, provider.experience_years / 20),
+                "proximity": 0.5 if distance is None else max(0, 1 - distance / max(float(provider.service_radius_km), 1)),
+                "response": 0.5 if provider.response_time_minutes is None else max(0, min(1, 1 - provider.response_time_minutes / 240)),
+                "price": 0.5 if provider.hourly_rate is None or not request.budget_max else max(0, 1 - float(provider.hourly_rate) / float(request.budget_max)),
+                "experience": (min(1, (provider.experience_years or 0) / 20) + min(1, completed_jobs / 100)) / 2,
             }
             total = sum(components[k] * WEIGHTS[k] for k in WEIGHTS)
             results.append((total, provider, user, rating, count, distance, components))

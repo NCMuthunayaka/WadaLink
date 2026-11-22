@@ -69,9 +69,9 @@ export default function MatchingProvidersScreen({
         <View style={styles.formula}>
           <Icon name="auto-awesome" size={18} color={colors.accentDark} />
           <View style={styles.formulaText}>
-            <Text variant="labelLg">Transparent AI Dispatch Formula</Text>
+            <Text variant="labelLg">How these providers are ranked</Text>
             <Text variant="bodySm" color={colors.textSecondary}>
-              Ranked by AI score: {describeWeights(data.weights)}.
+              {describeWeights(data.weights)}. Scores help you compare providers; they are not a guarantee of service quality.
             </Text>
           </View>
         </View>
@@ -80,17 +80,19 @@ export default function MatchingProvidersScreen({
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
         <Chip
           label="Best Match"
+          style={styles.filterChip}
           selected={filters.sort === 'best'}
           onPress={() => setFilters((f) => ({ ...f, sort: 'best' }))}
         />
         <Chip
           label="Price: Low to High"
+          style={styles.filterChip}
           selected={filters.sort === 'price'}
           onPress={() => setFilters((f) => ({ ...f, sort: 'price' }))}
         />
-        <Chip label="< 5 km" icon="near-me" selected={filters.within5km} onPress={() => toggle('within5km')} />
-        <Chip label="4.5+ ★" selected={filters.topRated} onPress={() => toggle('topRated')} />
-        <Chip label="Verified Only" icon="verified" selected={filters.verifiedOnly} onPress={() => toggle('verifiedOnly')} />
+        <Chip style={styles.filterChip} label="< 5 km" icon="near-me" selected={filters.within5km} onPress={() => toggle('within5km')} />
+        <Chip style={styles.filterChip} label="4.5+ ★" selected={filters.topRated} onPress={() => toggle('topRated')} />
+        <Chip style={styles.filterChip} label="Verified Only" icon="verified" selected={filters.verifiedOnly} onPress={() => toggle('verifiedOnly')} />
       </ScrollView>
     </View>
   );
@@ -100,7 +102,7 @@ export default function MatchingProvidersScreen({
       {header}
       <FlatList
         data={visible}
-        keyExtractor={(provider) => provider.providerId}
+        keyExtractor={(provider) => String(provider.providerId)}
         contentContainerStyle={styles.list}
         ListHeaderComponent={listHeader}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -125,8 +127,8 @@ export default function MatchingProvidersScreen({
                 : 'Try removing a filter to see more providers.'}
             </Text>
             {filtersActive ? (
-              <Button label="Clear filters" variant="outline" onPress={() => setFilters(DEFAULT_FILTERS)} />
-            ) : null}
+              <Button label="Clear filters" size="lg" variant="outline" onPress={() => setFilters(DEFAULT_FILTERS)} />
+            ) : <Button label="Review service category" size="lg" variant="outline" onPress={() => navigation.navigate('CreateRequest', { requestId })} />}
           </View>
         }
       />
@@ -141,6 +143,7 @@ const styles = StyleSheet.create({
   formula: { flexDirection: 'row', gap: spacing.md },
   formulaText: { flex: 1, gap: 2 },
   filters: { gap: spacing.sm, paddingRight: spacing.base },
+  filterChip: { height: 'auto', minHeight: 48, paddingVertical: spacing.sm },
   separator: { height: spacing.md },
   empty: { alignItems: 'center', gap: spacing.sm, padding: spacing.xl },
   emptyText: { textAlign: 'center', marginBottom: spacing.sm },

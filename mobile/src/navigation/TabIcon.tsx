@@ -20,9 +20,9 @@ export default function TabIcon({ name, focused, color }: TabIconProps) {
 /** Use as `options={{ tabBarIcon: tabIcon('home') }}`. */
 export const tabIcon =
   (name: IconName) =>
-  ({ focused, color }: { focused: boolean; color: string }) => (
-    <TabIcon name={name} focused={focused} color={color} />
-  );
+  function NamedTabIcon({ focused, color }: { focused: boolean; color: string }) {
+    return <TabIcon name={name} focused={focused} color={color} />;
+  };
 
 const styles = StyleSheet.create({
   wrap: {

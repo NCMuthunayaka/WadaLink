@@ -42,7 +42,7 @@ export default function ProviderMatchCard({ provider, weights, badges = [] }: Pr
         <View style={styles.matchPill}>
           <Icon name="bolt" size={14} color={colors.accentDark} />
           <Text variant="labelSm" color={colors.accentDark}>
-            {matchPercent(provider)}% MATCH
+            {matchPercent(provider)}/100 MATCH SCORE
           </Text>
         </View>
         {badges.map((badge) => (
@@ -68,12 +68,12 @@ export default function ProviderMatchCard({ provider, weights, badges = [] }: Pr
       <View style={styles.metrics}>
         <Metric icon="location-on" label="Distance" value={formatDistance(provider.distanceKm)} />
         <Metric icon="timer" label="Response" value={formatResponse(provider.responseMinutes)} />
-        {provider.hourlyRate !== undefined ? (
+        {provider.hourlyRate != null ? (
           <Metric icon="payments" label="Rate" value={`${formatCurrency(provider.hourlyRate)}/hr`} />
         ) : null}
       </View>
 
-      {provider.estimatedPrice !== undefined ? (
+      {provider.estimatedPrice != null ? (
         <View style={styles.estimate}>
           <Text variant="bodyMd" color={colors.textSecondary}>
             Estimated total
@@ -86,18 +86,19 @@ export default function ProviderMatchCard({ provider, weights, badges = [] }: Pr
         onPress={() => setExpanded((v) => !v)}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
-        accessibilityLabel="Why this match"
+        accessibilityLabel={`Why ${provider.name} is recommended`}
         style={styles.expandRow}
       >
         <Icon name="auto-awesome" size={16} color={colors.accentDark} />
         <Text variant="labelLg" color={colors.accentDark} style={styles.expandLabel}>
-          Why this match
+          Why this provider?
         </Text>
         <Icon name={expanded ? 'expand-less' : 'expand-more'} size={20} color={colors.accentDark} />
       </Pressable>
 
       {expanded ? (
         <View style={styles.breakdown}>
+          <Text variant="bodySm" color={colors.textSecondary}>Each factor contributes according to its weight. Missing information can affect the score.</Text>
           {COMPONENT_ORDER.map((component) => (
             <ScoreBar
               key={component}
@@ -127,13 +128,15 @@ const styles = StyleSheet.create({
   identityText: { flex: 1, gap: 2 },
   metrics: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
     justifyContent: 'space-between',
     marginTop: spacing.base,
     paddingTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.borderLight,
   },
-  metric: { gap: 2 },
+  metric: { gap: spacing.xs, minWidth: 80 },
   metricHead: { flexDirection: 'row', alignItems: 'center' },
   estimate: {
     flexDirection: 'row',
@@ -144,7 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surfaceLow,
   },
-  expandRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.md },
+  expandRow: { flexDirection: 'row', alignItems: 'center', minHeight: 48, marginTop: spacing.md },
   expandLabel: { flex: 1, marginLeft: spacing.xs },
   breakdown: { gap: spacing.sm, marginTop: spacing.md },
 });

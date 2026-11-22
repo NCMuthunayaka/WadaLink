@@ -1,0 +1,7 @@
+joblib
+scikit-learn
+matplotlib
+httpx
+sqlalchemy
+python-dotenv
+psycopg[binary]

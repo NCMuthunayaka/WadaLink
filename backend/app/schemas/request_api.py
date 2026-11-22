@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class RequestCreate(BaseModel):
-    categoryId: int
+    categoryId: int | None = None
     title: str = Field(max_length=200)
     description: str = Field(min_length=3, max_length=10000)
     urgency: str = "medium"
