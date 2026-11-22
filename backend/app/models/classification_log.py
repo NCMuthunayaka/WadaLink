@@ -45,6 +45,8 @@ class ClassificationLog(Base):
         db_enum(UrgencyLevel, "urgency_level")
     )
     model_name: Mapped[Optional[str]] = mapped_column(String(100))
+    model_version: Mapped[Optional[str]] = mapped_column(String(100))
+    layer: Mapped[Optional[str]] = mapped_column(String(50))
     confidence_score: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 4))
     input_text: Mapped[Optional[str]] = mapped_column(Text)
     output_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON)

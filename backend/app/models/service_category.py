@@ -9,6 +9,7 @@ from .base import Base, BigIntUnsigned
 if TYPE_CHECKING:
     from .classification_log import ClassificationLog
     from .service_request import ServiceRequest
+    from .provider import Provider
 
 
 class ServiceCategory(Base):
@@ -33,6 +34,9 @@ class ServiceCategory(Base):
 
     service_requests: Mapped[List["ServiceRequest"]] = relationship(back_populates="category")
     classification_logs: Mapped[List["ClassificationLog"]] = relationship(back_populates="category")
+    providers: Mapped[List["Provider"]] = relationship(
+        secondary="provider_service_categories", back_populates="service_categories"
+    )
 
     def __repr__(self) -> str:
         return f"<ServiceCategory id={self.category_id} name={self.category_name!r}>"
