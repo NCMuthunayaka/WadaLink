@@ -1,0 +1,31 @@
+text,actual,predicted,confidence
+hi,other,other,0.07676204554488476
+hi,other,other,0.07676204554488476
+tv turns on for two seconds then shuts down automatically,appliance_repair,appliance_repair,0.08402421210924921
+"smart tv hang and restart again and again, annoyed with this",appliance_repair,appliance_repair,0.09527451000201725
+replace damaged modular rj45 keystone jack in study room,networking_internet,networking_internet,0.0960303277987269
+"hair cutting and bridal makeup at home, in galle",other,other,0.09611972937208468
+plumber need urgent,plumbing,plumbing,0.09908333907529682
+Data is not loading,networking_internet,appliance_repair,0.1014242172441282
+sound is coming please look,other,other,0.10262940585621982
+gully choked,plumbing,plumbing,0.10286877195140481
+"gaming pc build and assemble for my son, budget is limited",it_computer_repair,it_computer_repair,0.10372326684752811
+heater repair urgent,solar_power,solar_power,0.10464142517473818
+Can you do wall preparation in Gampaha this week?,painting,painting,0.10495897169664789
+dvr box power supply unit burnt out replacement needed,cctv_security,electrical,0.10622561418608142
+need polish for teak dining set before festival,carpentry,carpentry,0.10736730624265116
+install grid-tie bidirectional meter box and surge protection device,solar_power,solar_power,0.10785005613330036
+"The front grill is loose and making noise whenever we open it. Please secure it properly, and the nearby wall light can be checked later.",welding_metalwork,welding_metalwork,0.11119155126180154
+Please replace the old tap in our house before guests arrive.,plumbing,plumbing,0.11189958747501465
+"crack above the door frame, in kandy, can someone see it tomorrow morning",masonry_tiling,masonry_tiling,0.1120169195741129
+"pls make our front yard look good, it is just bare soil now, in negombo",gardening_landscaping,gardening_landscaping,0.1128217005370342
+convert open garage into fully enclosed self-contained studio annex,construction_renovation,construction_renovation,0.11282737843982284
+sofa shampoo service in Kottawa,cleaning,cleaning,0.11291107223168416
+"the hedge is out of control, need shaping",gardening_landscaping,gardening_landscaping,0.11321933513374945
+Need this fixed before tomorrow because we have a lot of clothes to wash.,appliance_repair,appliance_repair,0.11476111670705459
+"rat trap not working, they are too smart, need professional",pest_control,pest_control,0.1150969095792413
+old garage wall need to be knocked down,construction_renovation,construction_renovation,0.1151003625758076
+"freezer in my small shop at home is warm inside, only for home use, need check",appliance_repair,appliance_repair,0.1164765057650002
+More space required,construction_renovation,construction_renovation,0.11655648728074045
+Can someone check this kitchen appliance in Colombo?,appliance_repair,appliance_repair,0.11671342320650345
+Please fix my TV before tonight.,appliance_repair,appliance_repair,0.11806735471955573
