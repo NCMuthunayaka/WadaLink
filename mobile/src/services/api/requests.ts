@@ -23,10 +23,10 @@ export interface RequestsGateway {
 
 const httpRequestsGateway: RequestsGateway = {
   listCategories: async () => (await http.get<ServiceCategory[]>('/requests/categories')).data,
-  listMyRequests: () => mockRequestsGateway.listMyRequests(),
+  listMyRequests: async () => (await http.get<ServiceRequest[]>('/requests')).data,
   getRequest: async (id) => (await http.get<ServiceRequest>(`/requests/${id}`)).data,
   createRequest: async (input) => (await http.post<ServiceRequest>('/requests', input)).data,
-  updateRequest: (id, input) => mockRequestsGateway.updateRequest(id, input),
+  updateRequest: async (id, input) => (await http.patch<ServiceRequest>(`/requests/${id}`, input)).data,
   getClassification: async (requestId) =>
     (await http.get<AIClassification>(`/requests/${requestId}/classification`)).data,
   getMatches: async (requestId) => {

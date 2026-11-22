@@ -15,7 +15,7 @@ HAZARDS = {"fire", "smoke", "gas", "spark", "flood", "explosion", "exposed wire"
 
 def classify_text(text: str) -> dict:
     normalized = re.sub(r"\s+", " ", text.lower()).strip()
-    scores = {category: sum(normalized.count(term) for term in terms) for category, terms in CATEGORY_RULES.items()}
+    scores = {category: sum(len(re.findall(r'\b' + re.escape(term) + r'\w*\b', normalized)) for term in terms) for category, terms in CATEGORY_RULES.items()}
     category, score = max(scores.items(), key=lambda item: item[1])
     if score == 0:
         category, confidence = "General Maintenance", 0.35

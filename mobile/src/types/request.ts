@@ -53,6 +53,7 @@ export type ClassificationStatus = 'success' | 'failed' | 'fallback';
  * output_json so the AI result screen can render it.
  */
 export interface AIClassification {
+  layer?: 'model' | 'llm' | 'keyword' | 'user';
   requestId: ID;
   categoryId?: ID;
   categoryName: string;
@@ -61,6 +62,8 @@ export interface AIClassification {
   confidence: number;
   status: ClassificationStatus;
   details: {
+    categories?: string[];
+    reason?: string;
     riskHeadline?: string;
     anomaly?: string;
     rootCause?: string;

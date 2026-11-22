@@ -1,0 +1,41 @@
+{
+  "database": "PostgreSQL confirmed from configured URL; no database migration or external schema mutation performed",
+  "implemented": [
+    "Groq wrapper with JSON validation, timeout, retry and PII scrubbing",
+    "Threshold file and cosine-similarity acceptance gate",
+    "Layer responses, short-input fallback and allowed-category validation",
+    "Request creation survives classification failure and accepts no category",
+    "Owner authorization on classification and matching endpoints",
+    "Manual category correction API and mobile button",
+    "Real API default, real request listing and editing",
+    "Low-confidence suggestions and unavailable-service messaging",
+    "Provider category proposal form and API, admin-only approved-label export",
+    "Ranking weights in JSON, missing data handling and uncategorized match guard",
+    "Ranking reads current reviews/completed jobs and computes response time from quotation timestamps",
+    "Price-only baseline and independently judged ranking evaluation utility",
+    "Retraining requires reviewed labels, rejects validation overlap and conflicting labels, gates promotion on macro F1",
+    "Version preservation, atomic promotion and tested rollback",
+    "Held-out evaluation, confusion charts, timings and layer percentages utility",
+    "Development-set threshold sweep and calibration chart utility",
+    "Local archive of existing training data, model, threshold and OOS template"
+  ],
+  "not_completed": [
+    "Off-device backup: destination has not been supplied",
+    "Final human, out-of-scope, independent validation and ranking judgement datasets: user confirms none exist",
+    "Live Groq verification: no key configured; exposed chat key was not stored",
+    "Calibrated similarity cutoff, final metrics, threshold chart results and ranking superiority claim require reviewed datasets",
+    "Production latency under 3 seconds: not measured; two 5-second LLM attempts can exceed this target",
+    "Multi-process cache and rate-limit coordination: current cache/rate state is per process",
+    "Full quotation/completion event integration: those marketplace endpoints remain outside the implemented ranking calculations",
+    "Vehicle scope conflict: existing model includes vehicle_repair, so rejecting car requests depends on the active database category list",
+    "Mobile device end-to-end validation has not been performed"
+  ],
+  "commands": {
+    "dependencies": "pip install -r ml/requirements-runtime.txt",
+    "evaluate": "python ml/src/evaluate_system.py --human HUMAN.csv --out-of-scope OOS.csv --output ml/reports/heldout-run",
+    "calibrate": "python ml/src/calibrate.py VALIDATION.csv --output ml/reports/calibration-run",
+    "retrain": "python ml/src/retrain.py --validation VALIDATION.csv --approved APPROVED.csv",
+    "rollback": "python ml/src/retrain.py --rollback ml/models/rollback-VERSION.joblib",
+    "ranking": "python ml/src/ranking_evaluation.py JUDGEMENTS.csv"
+  }
+}
