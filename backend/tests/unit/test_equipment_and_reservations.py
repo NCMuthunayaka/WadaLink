@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base
+from app.models.customer import Customer
 from app.models.provider import Provider
 from app.models.user import AccountStatus, User, UserRole
 from app.models.equipment import EquipmentStatus
@@ -26,11 +27,11 @@ def db_session():
     )
     renter_user = User(
         user_id=2, full_name="Sparkline Electrical", email="sparkline@test.com",
-        password_hash="test", role=UserRole.PROVIDER, account_status=AccountStatus.ACTIVE,
+        password_hash="test", role=UserRole.CUSTOMER, account_status=AccountStatus.ACTIVE,
     )
     session.add_all([provider_user, renter_user])
     session.flush()
-    session.add_all([Provider(provider_id=1), Provider(provider_id=2)])
+    session.add_all([Provider(provider_id=1), Customer(customer_id=2)])
     session.commit()
     yield session
     session.close()
@@ -82,3 +83,7 @@ def test_status_lifecycle_handling(db_session):
     assert returned.status == "returned"
     db_session.refresh(equipment)
     assert equipment.status == EquipmentStatus.AVAILABLE
+
+    with pytest.raises(HTTPException) as exc:
+        ReservationService.update_reservation_status(db_session, reservation.id, ReservationStatusUpdate(status="in_rent"), user_id=2)
+    assert exc.value.status_code == 403

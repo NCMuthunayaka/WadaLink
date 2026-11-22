@@ -51,7 +51,7 @@ export function mapAuthResponse(dto: AuthResponseDto): AuthSession {
   return { token: dto.access_token, user: mapUser(dto.user) };
 }
 
-/** MySQL DECIMAL columns usually reach JSON as strings ("85.00"). Used from Step 6 on. */
+/** PostgreSQL NUMERIC values may reach JSON as strings ("85.00"). */
 export function toNumber(value: number | string | null | undefined): number | undefined {
   if (value === null || value === undefined || value === '') return undefined;
   const n = typeof value === 'number' ? value : Number(value);

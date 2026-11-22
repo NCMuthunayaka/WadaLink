@@ -10,7 +10,6 @@ from .base import Base, BigIntUnsigned, TimestampMixin, db_enum
 
 if TYPE_CHECKING:
     from .equipment import Equipment
-    from .equipment_reservation import EquipmentReservation
     from .provider_score import ProviderScore
     from .quotation import Quotation
     from .service_request import ServiceRequest
@@ -88,9 +87,6 @@ class Provider(TimestampMixin, Base):
     )
     equipment: Mapped[List["Equipment"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan", passive_deletes=True
-    )
-    equipment_reservations: Mapped[List["EquipmentReservation"]] = relationship(
-        back_populates="renter"
     )
 
     def __repr__(self) -> str:

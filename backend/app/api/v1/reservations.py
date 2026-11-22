@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db
+from app.core.dependencies import require_role
+from app.models.user import User
 from app.services.reservation_service import ReservationService
 from app.schemas.equipment_reservation import (
     ReservationCreate,
@@ -17,8 +19,8 @@ router = APIRouter(prefix="/reservations", tags=["Equipment Reservations"])
 @router.post("/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED)
 def book_equipment(
     reservation_in: ReservationCreate,
-    renter_id: int = Query(2, description="Customer / Renter user ID (from auth)"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("customer")),
 ):
     """
     Book equipment with double-booking / conflict validation and ACID transaction.
@@ -27,7 +29,7 @@ def book_equipment(
     return ReservationService.create_reservation(
         db=db,
         reservation_in=reservation_in,
-        renter_id=renter_id,
+        renter_id=current_user.user_id,
     )
 
 
@@ -62,24 +64,30 @@ def check_availability(
 
 @router.get("/my", response_model=List[ReservationResponse])
 def get_my_reservations(
-    user_id: int = Query(2, description="Current user ID"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("customer")),
 ):
     """
     Retrieve reservations booked by the current customer.
     """
-    return ReservationService.get_user_reservations(db=db, user_id=user_id)
+    return ReservationService.get_user_reservations(db=db, user_id=current_user.user_id)
 
 
 @router.get("/{reservation_id}", response_model=ReservationResponse)
 def get_reservation_detail(
     reservation_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("customer", "provider")),
 ):
     """
     Get full details of a specific reservation.
     """
-    res = ReservationService.get_reservation_by_id(db=db, reservation_id=reservation_id)
+    res = ReservationService.get_reservation_by_id(
+        db=db,
+        reservation_id=reservation_id,
+        user_id=current_user.user_id,
+        user_role=current_user.role.value,
+    )
     if not res:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -92,8 +100,8 @@ def get_reservation_detail(
 def update_reservation_lifecycle_status(
     reservation_id: int,
     status_in: ReservationStatusUpdate,
-    user_id: int = Query(1, description="Current user / provider ID performing action"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("provider")),
 ):
     """
     Status Lifecycle Transaction Handling:
@@ -106,5 +114,5 @@ def update_reservation_lifecycle_status(
         db=db,
         reservation_id=reservation_id,
         status_in=status_in,
-        user_id=user_id,
+        user_id=current_user.user_id,
     )
