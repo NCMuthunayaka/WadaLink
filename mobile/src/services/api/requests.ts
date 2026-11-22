@@ -1,4 +1,5 @@
 import { mockRequestsGateway } from '@/services/mock/requests';
+import { env } from '@/config/env';
 import { api } from '@/store/api';
 import type { MatchResult } from '@/types/provider';
 import type {
@@ -8,6 +9,7 @@ import type {
   ServiceRequest,
 } from '@/types/request';
 import { toResult } from './helpers';
+import { http } from './client';
 
 export interface RequestsGateway {
   listCategories(): Promise<ServiceCategory[]>;
@@ -19,11 +21,37 @@ export interface RequestsGateway {
   getMatches(requestId: string): Promise<MatchResult>;
 }
 
-// TODO(backend): the API has no request, classification or matching endpoints yet,
-// so this always uses the mock, even with EXPO_PUBLIC_USE_MOCK=false. When they
-// exist, add an HTTP implementation here (DTOs and mappers go in mappers.ts) and
-// pick it the way services/api/equipment.ts does.
-const gateway: RequestsGateway = mockRequestsGateway;
+const httpRequestsGateway: RequestsGateway = {
+  listCategories: async () => (await http.get<ServiceCategory[]>('/requests/categories')).data,
+  listMyRequests: () => mockRequestsGateway.listMyRequests(),
+  getRequest: async (id) => (await http.get<ServiceRequest>(`/requests/${id}`)).data,
+  createRequest: async (input) => (await http.post<ServiceRequest>('/requests', input)).data,
+  updateRequest: (id, input) => mockRequestsGateway.updateRequest(id, input),
+  getClassification: async (requestId) =>
+    (await http.get<AIClassification>(`/requests/${requestId}/classification`)).data,
+  getMatches: async (requestId) => {
+    const result = (await http.get<MatchResult>(`/requests/${requestId}/matches`)).data;
+    const scale = (value: number) => Math.round(value * 1000) / 10;
+    return {
+      ...result,
+      providers: result.providers.map((provider) => ({
+        ...provider,
+        score: {
+          total: scale(provider.score.total),
+          rating: scale(provider.score.rating),
+          proximity: scale(provider.score.proximity),
+          response: scale(provider.score.response),
+          price: scale(provider.score.price),
+          experience: scale(provider.score.experience),
+        },
+      })),
+    };
+  },
+};
+
+// Request creation remains on the mock until the request CRUD API is added;
+// AI reads use the production backend whenever mock mode is disabled.
+const gateway: RequestsGateway = env.useMock ? mockRequestsGateway : httpRequestsGateway;
 
 export const requestsApi = api.injectEndpoints({
   endpoints: (build) => ({

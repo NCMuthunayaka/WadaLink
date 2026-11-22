@@ -163,7 +163,7 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
+      <StatusBar barStyle="dark-content" />
 
       {/* ── Header ─────────────────────────────────────────── */}
       <View style={styles.header}>
