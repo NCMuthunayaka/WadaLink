@@ -7,6 +7,5 @@ export * from './notification';
 export * from './provider';
 export * from './quotation';
 export * from './request';
-export * from './reservation';
 export * from './review';
 export * from './user';

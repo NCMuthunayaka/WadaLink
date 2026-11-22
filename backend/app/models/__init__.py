@@ -7,7 +7,7 @@ from .base import Base
 
 from .user import AccountStatus, User, UserRole
 from .customer import Customer
-from .provider import ApprovalStatus, Provider
+from .provider import ApprovalStatus, Provider, provider_service_categories
 from .service_category import ServiceCategory
 from .service_request import RequestStatus, ServiceRequest, UrgencyLevel
 from .classification_log import ClassificationLog, ClassificationStatus
@@ -19,6 +19,7 @@ from .message import Message
 from .notification import DeliveryStatus, Notification, NotificationChannel
 from .review import Review
 from .admin_log import AdminLog
+from .ai_review import CategoryProposal, LabeledRequest, ReviewQueueStatus, UnmatchedRequest, ModelRegistry
 
 __all__ = [
     "Base",

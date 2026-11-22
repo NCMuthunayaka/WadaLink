@@ -6,6 +6,7 @@ const SEED: Equipment[] = [
   {
     id: '1',
     name: 'FLIR E8-XT Thermal Ca...',
+    condition: 'like_new',
     category: 'Diagnostic & Inspection',
     imageUrl: 'https://images.unsplash.com/photo-1635002962399-9e6c2e6e6e6e?w=200',
     pricePerDay: 45,
@@ -27,6 +28,7 @@ const SEED: Equipment[] = [
   {
     id: '2',
     name: 'Greenlee 555 Conduit ...',
+    condition: 'good',
     category: 'Heavy Electrical Tools',
     imageUrl: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200',
     pricePerDay: 65,
@@ -38,6 +40,7 @@ const SEED: Equipment[] = [
   {
     id: '3',
     name: 'CAT 301.5 Mini Excava...',
+    condition: 'worksite',
     category: 'Heavy Machinery • Trench Bucket',
     imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200',
     pricePerDay: 185,
@@ -50,6 +53,7 @@ const SEED: Equipment[] = [
   {
     id: '4',
     name: 'Southwire Maxis 3K C...',
+    condition: 'good',
     category: 'Conduit Pulling Rig',
     imageUrl: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=200',
     pricePerDay: 55,
@@ -92,6 +96,8 @@ export const mockEquipmentGateway: EquipmentGateway = {
       inRent: items.filter((e) => e.status === 'in_rent' || e.status === 'reserved').length,
       mtdRevenue: MTD_REVENUE,
       revenueChange: REVENUE_CHANGE,
+      pendingRequests: 0,
+      fleetYield: 0,
     };
     return stats;
   },

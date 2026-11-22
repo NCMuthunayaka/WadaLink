@@ -6,7 +6,7 @@ import type { Equipment, EquipmentStats } from '@/types/equipment';
 import { buildFilterCounts, filterEquipment } from '../selectors';
 
 const EMPTY_ITEMS: Equipment[] = [];
-const EMPTY_STATS: EquipmentStats = { totalItems: 0, inRent: 0, mtdRevenue: 0, revenueChange: 0 };
+const EMPTY_STATS: EquipmentStats = { totalItems: 0, inRent: 0, mtdRevenue: 0, revenueChange: 0, pendingRequests: 0, fleetYield: 0 };
 
 export type FleetStatus = 'loading' | 'error' | 'ready';
 
