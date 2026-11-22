@@ -2,8 +2,8 @@
 
 | Section | Items | DONE | PARTIAL | MISSING | CANNOT VERIFY | Completion |
 |---|---:|---:|---:|---:|---:|---:|
-| 0 Decisions | 10 | 1 | 0 | 9 | 0 | 10.0% |
-| 1 Foundation | 32 | 6 | 0 | 26 | 0 | 18.8% |
+| 0 Decisions | 10 | 4 | 2 | 4 | 0 | 50.0% |
+| 1 Foundation | 32 | 8 | 11 | 3 | 10 | 42.2% |
 | 2 Module 1 | 36 | 26 | 1 | 9 | 0 | 73.6% |
 | 3 Module 2 | 51 | 41 | 7 | 3 | 0 | 88.2% |
 | 4 Module 3 | 29 | 9 | 1 | 19 | 0 | 32.8% |
@@ -16,7 +16,7 @@
 | 11 Documentation | 17 | 1 | 0 | 16 | 0 | 5.9% |
 | 12 Journal | 7 | 0 | 0 | 7 | 0 | 0.0% |
 | 13 Proposal fixes | 9 | 0 | 0 | 9 | 0 | 0.0% |
-| **TOTAL** | **307** | **108** | **16** | **183** | **0** | **37.8%** |
+| **TOTAL** | **307** | **113** | **29** | **155** | **10** | **41.5%** |
 
 ## Audit basis
 
@@ -37,54 +37,54 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 
 ## 0. Decisions to lock
 
-- **MISSING** [ALL] Final project name (ServiceLink or WedaLink), used everywhere
-- **MISSING** [ALL] Web app only (no mobile app)
+- **PARTIAL** [ALL] Final project name — source code uses WedaLink, but the repository folder is WadaLink and the checklist/proposal still use ServiceLink/WedaLink inconsistently.
+- **PARTIAL** [ALL] Product architecture — implemented as a hybrid: customer/provider mobile app plus admin web app; the “web app only” wording is incorrect.
 - **MISSING** [ALL] Confirm out of scope: payments, document verification, advanced analytics, push notifications
 - **DONE** [ALL] Backend framework: FastAPI
 - **MISSING** [ALL] Deployment target (AWS or Railway)
 - **MISSING** [ALL] Real weekly timeline and final deadlines (proposal 12 weeks, journal 15 weeks)
-- **MISSING** [ALL] Job status list and the flow between statuses
-- **MISSING** [ALL] Final REST API contract
+- **DONE** [ALL] Job status list and the flow between statuses — request statuses are defined in `backend/app/models/service_request.py`; reservation transitions are defined in `mobile/src/utils/statusFlow.ts`.
+- **DONE** [ALL] Final REST API contract — `docs/api-contract.md` and the registered FastAPI OpenAPI schema document the API surface.
 - **MISSING** [ALL] Final MySQL schema
-- **MISSING** [ALL] Language of the platform (English only)
+- **DONE** [ALL] Language of the platform (English only) — inspected mobile/admin user-facing copy is English.
 
 ---
 
 ## 1. Project foundation
 
 ### Repository
-- **MISSING** [M2] Branches: main, develop, feature/*, bugfix/*
-- **MISSING** [M2] Protect `main`
-- **MISSING** [M2] `.gitignore` (env files, model files, node_modules, venv)
-- **MISSING** [M2] No secrets in Git history
-- **MISSING** [M2] `.env.example` for backend and frontend
-- **MISSING** [M2] Root README (what it is, stack, how to run)
+- **PARTIAL** [M2] Branches: `main` and `develop` exist; no `feature/*` or `bugfix/*` branch evidence was found.
+- **CANNOT VERIFY** [M2] Protect `main` — requires GitHub repository settings.
+- **DONE** [M2] `.gitignore` (env files, model files, node_modules, venv) — ignore rules cover these artifacts.
+- **CANNOT VERIFY** [M2] No secrets in Git history — complete history scanning requires repository-wide verification.
+- **DONE** [M2] `.env.example` for backend and frontend — examples exist for backend, mobile, and admin.
+- **DONE** [M2] Root README (what it is, stack, how to run) — `README.md` documents the structure and stack.
 - **MISSING** [M2] Contributing guide and PR template
-- **MISSING** [ALL] Everyone can clone and run the project locally
+- **CANNOT VERIFY** [ALL] Everyone can clone and run the project locally — requires independent team-member verification.
 
 ### Project management
-- **MISSING** [ALL] Jira board matches the real work (epics, tasks, owners)
-- **MISSING** [ALL] Sprint dates correct
-- **MISSING** [ALL] GitHub Projects board added, or note that Jira replaces it
-- **MISSING** [ALL] Daily merges into `develop`
-- **MISSING** [ALL] Sprint review and retrospective every sprint
-- **MISSING** [ALL] Weekly meeting notes saved
-- **MISSING** [ALL] Mentor and supervisor meetings recorded
+- **CANNOT VERIFY** [ALL] Jira board matches the real work (epics, tasks, owners) — external project-management evidence required.
+- **CANNOT VERIFY** [ALL] Sprint dates correct — external project-management evidence required.
+- **CANNOT VERIFY** [ALL] GitHub Projects board added, or note that Jira replaces it — external project-management evidence required.
+- **CANNOT VERIFY** [ALL] Daily merges into `develop` — remote history/process evidence required.
+- **CANNOT VERIFY** [ALL] Sprint review and retrospective every sprint — meeting records required.
+- **CANNOT VERIFY** [ALL] Weekly meeting notes saved — external records required.
+- **CANNOT VERIFY** [ALL] Mentor and supervisor meetings recorded — external records required.
 
 ### Shared frontend shell
-- **MISSING** [ALL] Vite + React + Redux + Tailwind set up
-- **MISSING** [ALL] Routing
-- **MISSING** [ALL] Layout (header, sidebar, footer)
-- **MISSING** [ALL] Auth guard for protected pages
-- **MISSING** [ALL] Role-based route guard (customer, provider, admin)
-- **MISSING** [ALL] Shared components (button, input, modal, table, toast)
-- **MISSING** [ALL] API client with token handling
-- **MISSING** [ALL] 404 and error pages
-- **MISSING** [ALL] Final UI follows the Google Stitch designs
+- **PARTIAL** [ALL] Frontend stack — admin uses Vite/React/Redux and mobile uses Expo/React Native/Redux; Tailwind and one shared web shell are not present.
+- **PARTIAL** [ALL] Routing — mobile React Navigation exists and the admin app has its Vite entry shell, but there is no full admin route framework.
+- **PARTIAL** [ALL] Layout (header, sidebar, footer) — admin has a shell and mobile has navigation/layout components, but there is no shared cross-client shell.
+- **PARTIAL** [ALL] Auth guard for protected pages — mobile has session/access gating; the admin web panel lacks a complete login guard.
+- **PARTIAL** [ALL] Role-based route guard (customer, provider, admin) — mobile gates customer/provider/admin states; admin authorization is mainly API-side.
+- **DONE** [ALL] Shared components (button, input, modal, table, toast) — shared mobile UI components and admin styling/components exist.
+- **DONE** [ALL] API client with token handling — mobile HTTP/RTK Query clients and admin API service attach bearer tokens.
+- **PARTIAL** [ALL] 404 and error pages — mobile error states and admin request errors exist, but a dedicated admin 404 route/page is not evidenced.
+- **PARTIAL** [ALL] Final UI follows the Google Stitch designs — mobile uses the design guide/theme and admin has a matching shell; full-screen parity is not verified.
 
 ### Shared backend base
 - **DONE** [ALL] FastAPI project structure (routers, services, models, schemas)
-- **DONE** [ALL] SQLAlchemy and MySQL connection
+- **PARTIAL** [ALL] SQLAlchemy/database connection — SQLAlchemy and migrations are implemented, but runtime configuration uses PostgreSQL/Neon while the original checklist says MySQL.
 - **DONE** [ALL] Migrations
 - **MISSING** [ALL] Standard error response format
 - **DONE** [ALL] Request validation with schemas
