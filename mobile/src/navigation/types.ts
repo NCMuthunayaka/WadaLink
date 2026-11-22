@@ -23,6 +23,7 @@ export type CustomerStackParamList = {
   CreateRequest: { requestId?: string; categoryId?: string } | undefined;
   AIResult: { requestId: string };
   MatchingProviders: { requestId: string };
+  QuotationComparison: { requestId: string };
 };
 
 export type RootStackParamList = {
