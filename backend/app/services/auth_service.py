@@ -19,6 +19,9 @@ from app.core.security import (
     verify_password,
     create_access_token,
 )
+# Verified against when the email is unknown, so every login attempt costs
+# one password check and response time does not reveal registered emails.
+_DUMMY_PASSWORD_HASH = hash_password("not-a-real-password")
 
 
 def register_user(
@@ -123,10 +126,12 @@ def authenticate_user(
 
     # Use a generic message to avoid revealing whether
     # an email address is registered.
-    if user is None or not verify_password(
+    password_matches = verify_password(
         login_data.password,
-        user.password_hash,
-    ):
+        user.password_hash if user is not None else _DUMMY_PASSWORD_HASH,
+    )
+
+    if user is None or not password_matches:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
