@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user
 from app.models.user import User
@@ -66,3 +66,8 @@ def get_me(
 ) -> UserResponse:
     return get_me_controller(current_user=current_user)
 
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    current_user: User = Depends(get_current_user),
+) -> Response:
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
