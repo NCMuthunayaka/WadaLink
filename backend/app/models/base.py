@@ -21,8 +21,18 @@ from sqlalchemy.orm import (
     mapped_column,
     sessionmaker,
 )
+from sqlalchemy.engine import make_url
 
-engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+connect_args = (
+    {"connect_timeout": 5}
+    if make_url(settings.DATABASE_URL).get_backend_name() == "postgresql"
+    else {}
+)
+engine = create_engine(
+    settings.DATABASE_URL,
+    pool_pre_ping=True,
+    connect_args=connect_args,
+)
 
 SessionLocal = sessionmaker(
     bind=engine,

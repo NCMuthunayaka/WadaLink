@@ -72,7 +72,7 @@ export default function EquipmentCard({
           {/* Status badge */}
           <View style={styles.badgeRow}>
             <StatusBadge status={status} size="sm" />
-            {activeRental?.dueTime && (
+            {!!activeRental?.dueTime && (
               <Text style={styles.dueTime}>{activeRental.dueTime}</Text>
             )}
           </View>
@@ -99,7 +99,7 @@ export default function EquipmentCard({
       </View>
 
       {/* ── Context row (renter info / description) ──────────── */}
-      {activeRental?.renterName && (
+      {!!activeRental?.renterName && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>👤</Text>
           <Text style={styles.contextText}>
@@ -107,7 +107,7 @@ export default function EquipmentCard({
             <Text style={styles.contextBold}>{activeRental.renterName}</Text>
             {activeRental.dueTime ? ` · Active until ${activeRental.dueTime} today` : ''}
           </Text>
-          {activeRental.renterPhone && (
+          {!!activeRental.renterPhone && (
             <TouchableOpacity>
               <Text style={styles.callIcon}>📞</Text>
             </TouchableOpacity>
@@ -115,7 +115,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {activeRental?.pickupLocation && status === 'reserved' && (
+      {!!activeRental?.pickupLocation && status === 'reserved' && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>📍</Text>
           <Text style={styles.contextText}>
@@ -124,7 +124,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {status === 'return_pending' && activeRental?.returnLocation && (
+      {status === 'return_pending' && !!activeRental?.returnLocation && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>📦</Text>
           <Text style={styles.contextText}>
@@ -136,7 +136,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {description && !activeRental && (
+      {!!description && !activeRental && (
         <View style={styles.descRow}>
           <Text style={styles.descText} numberOfLines={2}>
             {description}

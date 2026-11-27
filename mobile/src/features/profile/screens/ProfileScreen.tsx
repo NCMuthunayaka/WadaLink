@@ -70,6 +70,75 @@ export default function ProfileScreen() {
     finally {
         setBusy(false);
     } }
-    return <FeaturePage title="Your profile" refresh={() => void r.reload()} refreshing={r.loading}>{r.error && <Notice text={r.error} retry={() => void r.reload()}/>}<Card style={s.hero}><Avatar name={r.data?.name ?? user?.name ?? ''} size={72}/><Text variant="headlineMd" color={colors.textInverse}>{r.data?.name ?? user?.name}</Text><Text color={colors.textInverse}>{user?.email}</Text><Text color={colors.textInverse}>{provider ? `Provider approval: ${r.data?.approvalStatus ?? 'Loading'}` : 'Customer account'}</Text></Card><View style={s.row}><Button size="lg" variant="secondary" label="Notifications" onPress={() => nav.navigate('Notifications')}/><Button size="lg" variant="outline" label="Equipment" onPress={() => nav.navigate('EquipmentCatalog')}/><Button size="lg" variant="outline" label="Rental history" onPress={() => nav.navigate('Reservations')}/></View>{r.data && <Card style={s.card}><Text variant="headlineSm">Account details</Text>{(['name', 'phone', ...(provider ? ['business', 'bio', 'experience', 'rate', 'radius'] : ['address'])] as (keyof typeof form)[]).map(key => <Input key={key} label={({ name: 'Full name', phone: 'Phone', business: 'Business name', bio: 'About your services', experience: 'Years of experience', rate: 'Hourly rate', radius: 'Service radius (km)', address: 'Address' })[key]} value={form[key]} multiline={key === 'bio'} onChangeText={value => setForm({ ...form, [key]: value })}/>)}{provider && <><Text variant="headlineSm">Service categories</Text><Text>Choose the services you offer to see relevant jobs.</Text>{categories.error && <Notice text={categories.error} retry={() => void categories.reload()}/>}<View style={s.row}>{categories.data?.map(c => <Button key={c.id} size="lg" label={`${selected.includes(String(c.id)) ? 'Selected: ' : ''}${c.name}`} variant={selected.includes(String(c.id)) ? 'secondary' : 'outline'} onPress={() => setSelected(selected.includes(String(c.id)) ? selected.filter(x => x !== String(c.id)) : [...selected, String(c.id)])}/>)}</View></>}<Button size="lg" label="Save profile" loading={busy} disabled={form.name.trim().length < 2} onPress={() => void save()}/></Card>}{provider && <CategoryProposalForm/>}{message && <Notice text={message}/>}<Button size="lg" variant="outline" label="Sign out" onPress={() => void dispatch(logout())}/></FeaturePage>;
+    return (
+        <FeaturePage title="Your profile" refresh={() => void r.reload()} refreshing={r.loading}>
+            {!!r.error && <Notice text={r.error} retry={() => void r.reload()} />}
+            <Card style={s.hero}>
+                <Avatar name={r.data?.name ?? user?.name ?? ''} size={72} />
+                <Text variant="headlineMd" color={colors.textInverse}>{r.data?.name ?? user?.name}</Text>
+                <Text color={colors.textInverse}>{user?.email}</Text>
+                <Text color={colors.textInverse}>
+                    {provider ? `Provider approval: ${r.data?.approvalStatus ?? 'Loading'}` : 'Customer account'}
+                </Text>
+            </Card>
+            <View style={s.row}>
+                <Button size="lg" variant="secondary" label="Notifications" onPress={() => nav.navigate('Notifications')} />
+                <Button size="lg" variant="outline" label="Equipment" onPress={() => nav.navigate('EquipmentCatalog')} />
+                <Button size="lg" variant="outline" label="Rental history" onPress={() => nav.navigate('Reservations')} />
+            </View>
+            <Button
+                size="lg"
+                variant="outline"
+                label="Sign out"
+                icon="logout"
+                onPress={() => void dispatch(logout())}
+            />
+            {r.data ? (
+                <Card style={s.card}>
+                    <Text variant="headlineSm">Account details</Text>
+                    {(['name', 'phone', ...(provider ? ['business', 'bio', 'experience', 'rate', 'radius'] : ['address'])] as (keyof typeof form)[]).map((key) => (
+                        <Input
+                            key={key}
+                            label={({ name: 'Full name', phone: 'Phone', business: 'Business name', bio: 'About your services', experience: 'Years of experience', rate: 'Hourly rate', radius: 'Service radius (km)', address: 'Address' })[key]}
+                            value={form[key]}
+                            multiline={key === 'bio'}
+                            onChangeText={(value) => setForm({ ...form, [key]: value })}
+                        />
+                    ))}
+                    {provider ? (
+                        <>
+                            <Text variant="headlineSm">Service categories</Text>
+                            <Text>Choose the services you offer to see relevant jobs.</Text>
+                            {!!categories.error && <Notice text={categories.error} retry={() => void categories.reload()} />}
+                            <View style={s.row}>
+                                {categories.data?.map((category) => (
+                                    <Button
+                                        key={category.id}
+                                        size="lg"
+                                        label={`${selected.includes(String(category.id)) ? 'Selected: ' : ''}${category.name}`}
+                                        variant={selected.includes(String(category.id)) ? 'secondary' : 'outline'}
+                                        onPress={() => setSelected(
+                                            selected.includes(String(category.id))
+                                                ? selected.filter((id) => id !== String(category.id))
+                                                : [...selected, String(category.id)],
+                                        )}
+                                    />
+                                ))}
+                            </View>
+                        </>
+                    ) : null}
+                    <Button
+                        size="lg"
+                        label="Save profile"
+                        loading={busy}
+                        disabled={form.name.trim().length < 2}
+                        onPress={() => void save()}
+                    />
+                </Card>
+            ) : null}
+            {provider ? <CategoryProposalForm /> : null}
+            {!!message && <Notice text={message} />}
+        </FeaturePage>
+    );
 }
 

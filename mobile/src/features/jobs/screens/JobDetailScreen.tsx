@@ -30,7 +30,7 @@ export default function JobDetailScreen({ route, navigation }: NativeStackScreen
         setBusy(false);
     } }
     const j = r.data;
-    return <FeaturePage title="Job details" refresh={() => void r.reload()} refreshing={r.loading}>{r.error && <Notice text={r.error} retry={() => void r.reload()}/>} {j && <><Card style={s.hero}><Text color={colors.textInverse}>{j.status.replaceAll('_', ' ')} · {j.urgency}</Text><Text color={colors.textInverse} variant="headlineMd">{j.title}</Text></Card><Card style={s.card}><Text variant="headlineSm">About this request</Text><Text>{j.description}</Text><Text>Location: {j.address}</Text>{j.budgetMax != null && <Text>Budget up to {j.budgetMax}</Text>}</Card>
+    return <FeaturePage title="Job details" refresh={() => void r.reload()} refreshing={r.loading}>{!!r.error && <Notice text={r.error} retry={() => void r.reload()}/>} {j && <><Card style={s.hero}><Text color={colors.textInverse}>{j.status.replaceAll('_', ' ')} · {j.urgency}</Text><Text color={colors.textInverse} variant="headlineMd">{j.title}</Text></Card><Card style={s.card}><Text variant="headlineSm">About this request</Text><Text>{j.description}</Text><Text>Location: {j.address}</Text>{j.budgetMax != null && <Text>Budget up to {j.budgetMax}</Text>}</Card>
  {!provider && j.status === 'open' && <><Button size="lg" label="Find matching providers" onPress={() => navigation.navigate('MatchingProviders', { requestId: id })}/><Button size="lg" variant="outline" label="Compare quotations" onPress={() => navigation.navigate('QuotationComparison', { requestId: id })}/></>}
  {provider && j.canQuote && <Button size="lg" label="Prepare quotation" onPress={() => navigation.navigate('QuotationSubmission', { requestId: id })}/>}
  {provider && j.status === 'assigned' && <Button size="lg" loading={busy} label="Start work" onPress={() => void act('start')}/>}
@@ -38,5 +38,5 @@ export default function JobDetailScreen({ route, navigation }: NativeStackScreen
  {['assigned', 'in_progress', 'completed'].includes(j.status) && <Button size="lg" variant="secondary" label="Message about this job" onPress={() => navigation.navigate('Chat', { requestId: id })}/>}
  {j.status === 'completed' && <Button size="lg" variant="outline" label="Reviews and feedback" onPress={() => navigation.navigate('Reviews', { requestId: id })}/>}
  {!provider && j.status === 'open' && <Button size="lg" variant="danger" loading={busy} label="Cancel request" onPress={() => void act('cancel')}/>}
- </>}{message && <Notice text={message}/>}</FeaturePage>;
+ </>}{!!message && <Notice text={message}/>}</FeaturePage>;
 }

@@ -2,7 +2,7 @@ import enum
 from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, Numeric, String, Text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, JSON, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, BigIntUnsigned, TimestampMixin, db_enum
@@ -27,6 +27,8 @@ class Equipment(TimestampMixin, Base):
     __table_args__ = (
         CheckConstraint("daily_rate >= 0", name="chk_eq_rate"),
         CheckConstraint("deposit_amount >= 0", name="chk_eq_deposit"),
+        CheckConstraint("delivery_fee >= 0", name="chk_eq_delivery_fee"),
+        CheckConstraint("delivery_radius >= 0", name="chk_eq_delivery_radius"),
         Index("idx_eq_status_category", "status", "category"),
     )
 
@@ -44,6 +46,14 @@ class Equipment(TimestampMixin, Base):
     deposit_amount: Mapped[Decimal] = mapped_column(
         Numeric(10, 2), nullable=False, default=Decimal("0.00"), server_default="0.00"
     )
+    image_url: Mapped[Optional[str]] = mapped_column(String(2048))
+    delivery_fee: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("0.00"), server_default="0.00"
+    )
+    delivery_radius: Mapped[int] = mapped_column(nullable=False, default=0, server_default="0")
+    tags: Mapped[Optional[list[str]]] = mapped_column(JSON)
+    pickup_location: Mapped[Optional[str]] = mapped_column(String(255))
+    return_location: Mapped[Optional[str]] = mapped_column(String(255))
     condition_description: Mapped[Optional[str]] = mapped_column(Text)
     status: Mapped[EquipmentStatus] = mapped_column(
         db_enum(EquipmentStatus, "equipment_status"),

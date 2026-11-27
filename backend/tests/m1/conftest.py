@@ -8,7 +8,7 @@ def no_ai(monkeypatch):
     """Keep tests offline: skip the AI classification step."""
     monkeypatch.setattr(
         "app.api.v1.requests.ClassificationService.classify_request",
-        lambda db, request: None,
+        lambda db, request, **kwargs: None,
     )
 
 

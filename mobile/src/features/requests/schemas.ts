@@ -3,7 +3,7 @@ import { URGENCY_LEVELS } from '@/types/request';
 
 // Limits follow service_requests: description is TEXT, address is VARCHAR(255).
 export const createRequestSchema = z.object({
-  categoryId: z.string().min(1, 'Choose a category'),
+  categoryId: z.string(),
   description: z
     .string()
     .trim()

@@ -1,11 +1,10 @@
 import React from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ImageBackground, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FormError from '@/components/common/FormError';
 import SectionHeader from '@/components/common/SectionHeader';
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Icon from '@/components/ui/Icon';
 import Text from '@/components/ui/Text';
 import { colors, radius, spacing } from '@/constants/theme';
 import type { CustomerTabScreenProps } from '@/navigation/types';
@@ -39,36 +38,40 @@ export default function CustomerHomeScreen({ navigation }: CustomerTabScreenProp
       }
     >
       <View style={styles.welcomeRow}>
-        <View style={styles.welcomeIcon}><Icon name="home-repair-service" size={22} color={colors.primary} /></View>
         <View style={styles.welcomeText}>
-          <Text variant="headlineMd">Hello, {firstName} 👋</Text>
-          <Text variant="bodyMd" color={colors.textSecondary}>What do you need help with today?</Text>
+          <Text variant="bodySm" color={colors.textMuted}>WELCOME BACK</Text>
+          <Text variant="headlineMd">Hello, {firstName}</Text>
         </View>
       </View>
 
-      <Card variant="dark" style={styles.dispatch}>
-        <View style={styles.dispatchHead}>
-          <View style={styles.dispatchIcon}>
-            <Icon name="bolt" size={22} color={colors.warning} />
-          </View>
-          <View style={styles.dispatchText}>
-            <Text variant="headlineSm" color={colors.textInverse}>
-              Instant Dispatch
-            </Text>
-            <Text variant="bodyMd" color={colors.textDisabled}>
-              Need an urgent repair? AI matches verified technicians in minutes.
-            </Text>
-          </View>
-        </View>
-        <Button
-          label="Create Service Request"
-          variant="ai"
-          size="lg"
-          fullWidth
-          icon="add-circle-outline"
-          onPress={() => navigation.navigate('CreateRequest')}
+      <ImageBackground
+        source={require('../../../../assets/wedalink-hero.png')}
+        resizeMode="cover"
+        imageStyle={styles.heroImage}
+        style={styles.hero}
+        accessibilityLabel="A home-service professional ready to help"
+      >
+        <LinearGradient
+          colors={['rgba(15, 23, 42, 0.02)', 'rgba(15, 23, 42, 0.88)']}
+          locations={[0.2, 1]}
+          style={StyleSheet.absoluteFill}
         />
-      </Card>
+        <View style={styles.heroContent}>
+          <Text variant="labelSm" color={colors.textInverse}>WEDALINK HOME SERVICES</Text>
+          <Text variant="headlineMd" color={colors.textInverse}>Home repairs, made easy.</Text>
+          <Text variant="bodySm" color={colors.textInverse}>
+            Describe the problem. We’ll help you find the right professional.
+          </Text>
+          <Button
+            label="Describe your issue"
+            variant="ai"
+            size="md"
+            fullWidth
+            icon="add-circle-outline"
+            onPress={() => navigation.navigate('CreateRequest')}
+          />
+        </View>
+      </ImageBackground>
 
       <View style={styles.section}>
         <SectionHeader title="Popular Categories" />
@@ -94,9 +97,12 @@ export default function CustomerHomeScreen({ navigation }: CustomerTabScreenProp
           onActionPress={() => navigation.navigate('Jobs')}
         />
         {recent.length === 0 && !requests.isLoading ? (
-          <Text variant="bodyMd" color={colors.textMuted}>
-            No requests yet. Create your first one above.
-          </Text>
+          <View style={styles.emptyState}>
+            <Text variant="headlineSm">No requests yet</Text>
+            <Text variant="bodySm" color={colors.textSecondary}>
+              Your service requests and provider updates will appear here.
+            </Text>
+          </View>
         ) : null}
         {recent.map((request) => (
           <RequestCard
@@ -114,20 +120,25 @@ export default function CustomerHomeScreen({ navigation }: CustomerTabScreenProp
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: spacing.base, paddingBottom: spacing.xxxl, gap: spacing.xl },
-  dispatch: { gap: spacing.base },
-  dispatchHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  dispatchIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.warningLight,
+  welcomeRow: { flexDirection: 'row', alignItems: 'center' },
+  welcomeText: { gap: spacing.xs },
+  hero: {
+    height: 250,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    backgroundColor: colors.dark,
+    justifyContent: 'flex-end',
   },
-  dispatchText: { flex: 1 },
-  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  welcomeIcon: { width: 46, height: 46, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primaryLight },
-  welcomeText: { flex: 1, gap: spacing.xs },
+  heroImage: { borderRadius: radius.xl },
+  heroContent: { padding: spacing.lg, gap: spacing.sm },
   section: { gap: spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: spacing.base },
+  emptyState: {
+    padding: spacing.lg,
+    gap: spacing.xs,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
 });

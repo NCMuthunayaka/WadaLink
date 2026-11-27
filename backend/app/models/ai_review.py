@@ -37,10 +37,14 @@ class CategoryProposal(Base):
 
 class UnmatchedRequest(Base):
     __tablename__ = "unmatched_requests"
+    __table_args__ = (Index("idx_unmatched_status_created", "status", "created_at"),)
     unmatched_id: Mapped[int] = mapped_column(BigIntUnsigned, primary_key=True, autoincrement=True)
     request_id: Mapped[Optional[int]] = mapped_column(BigIntUnsigned, ForeignKey("service_requests.request_id", ondelete="CASCADE"), nullable=False)
     input_text: Mapped[str] = mapped_column(Text, nullable=False)
     reason: Mapped[str] = mapped_column(String(255), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", server_default="pending")
+    reviewed_by: Mapped[Optional[int]] = mapped_column(BigIntUnsigned, ForeignKey("users.user_id", ondelete="SET NULL"))
+    reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
 

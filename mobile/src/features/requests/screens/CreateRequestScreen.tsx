@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import Chip from '@/components/ui/Chip';
 import FormInput from '@/components/ui/FormInput';
 import Icon from '@/components/ui/Icon';
+import Input from '@/components/ui/Input';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 import Text from '@/components/ui/Text';
 import { colors, spacing } from '@/constants/theme';
@@ -41,6 +42,9 @@ export default function CreateRequestScreen({
   const [createRequest] = useCreateRequestMutation();
   const [updateRequest] = useUpdateRequestMutation();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [manualReview, setManualReview] = useState(false);
+  const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
 
   const {
     control,
@@ -73,12 +77,16 @@ export default function CreateRequestScreen({
   }, [existing.data, presetCategoryId, reset]);
 
   const descriptionLength = watch('description').length;
+  const filteredCategories = (categories.data ?? []).filter((category) =>
+    category.name.toLowerCase().includes(categorySearch.trim().toLowerCase()),
+  );
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
     const categoryName = categories.data?.find((c) => c.id === values.categoryId)?.name ?? 'Service';
     const input: NewRequestInput = {
-      categoryId: values.categoryId,
+      categoryId: values.categoryId || undefined,
+      manualReview: requestId ? undefined : manualReview,
       title: deriveTitle(categoryName, values.description),
       description: values.description,
       urgency: values.urgency,
@@ -100,7 +108,7 @@ export default function CreateRequestScreen({
 
   const header = (
     <ScreenHeader
-      title={isEditing ? 'Edit Request' : 'Create Service Request'}
+      title={isEditing ? 'Edit request' : 'New service request'}
       onBack={() => navigation.goBack()}
     />
   );
@@ -119,50 +127,127 @@ export default function CreateRequestScreen({
       {header}
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-          <FlowProgress step={1} label="Details & Diagnostics" />
+          <FlowProgress step={1} label="Request details" />
 
-          <View style={styles.field}>
-            <Text variant="labelLg">Service Category</Text>
-            <Controller
-              control={control}
-              name="categoryId"
-              render={({ field, fieldState }) => (
-                <View style={styles.field}>
-                  <View style={styles.chips}>
-                    {(categories.data ?? []).map((category) => (
-                      <Chip
-                        key={category.id}
-                        label={category.name}
-                        icon={categoryIcon(category.name)}
-                        selected={field.value === category.id}
-                        onPress={() => field.onChange(category.id)}
-                      />
-                    ))}
-                  </View>
-                  {fieldState.error ? (
-                    <Text variant="labelMd" color={colors.danger}>
-                      {fieldState.error.message}
-                    </Text>
-                  ) : null}
-                </View>
-              )}
-            />
+          <View style={styles.intro}>
+            <Text variant="headlineMd">What needs fixing?</Text>
+            <Text variant="bodyMd" color={colors.textSecondary}>
+              Tell us what happened and we’ll help find the right professional.
+            </Text>
           </View>
 
           <FormInput
             control={control}
             name="description"
-            label="Issue Description"
+            label="Describe the problem"
             placeholder="Describe symptoms, strange noises, when it happens..."
-            helper={`${descriptionLength}/2000 · Be specific so our AI can match the right specialist.`}
+            helper={`${descriptionLength}/2000`}
             multiline
             maxLength={2000}
+          />
+
+          <Controller
+            control={control}
+            name="categoryId"
+            render={({ field, fieldState }) => {
+              const selectedCategory = categories.data?.find((category) => category.id === field.value);
+              const categorySummary = manualReview
+                ? 'Our team will review this service'
+                : selectedCategory?.name ?? 'AI will choose from your description';
+
+              return (
+                <Card style={styles.categoryCard}>
+                  <View style={styles.categoryHeading}>
+                    <View style={styles.categoryIcon}>
+                      <Icon name={selectedCategory ? categoryIcon(selectedCategory.name) : 'auto-awesome'} size={20} color={colors.primary} />
+                    </View>
+                    <View style={styles.categoryHeadingText}>
+                      <Text variant="labelLg">Service category</Text>
+                      <Text variant="bodySm" color={colors.textMuted}>Optional</Text>
+                    </View>
+                    <Button
+                      label={categoryPickerVisible ? 'Close' : 'Change'}
+                      variant="ghost"
+                      size="sm"
+                      onPress={() => setCategoryPickerVisible(!categoryPickerVisible)}
+                    />
+                  </View>
+                  <Text variant="bodyMd" color={colors.textSecondary}>{categorySummary}</Text>
+
+                  {categoryPickerVisible ? (
+                    <View style={styles.categoryPicker}>
+                      <Input
+                        label="Find a category"
+                        placeholder="Search services"
+                        leftIcon="search"
+                        value={categorySearch}
+                        onChangeText={setCategorySearch}
+                      />
+                      {categories.isLoading ? (
+                        <Text variant="bodySm" color={colors.textMuted}>Loading categories…</Text>
+                      ) : categories.isError ? (
+                        <FormError message="Could not load categories. You can continue and let AI choose." />
+                      ) : (
+                        <View style={styles.chips}>
+                          <Button
+                            label="Let AI choose"
+                            variant={!field.value && !manualReview ? 'secondary' : 'outline'}
+                            size="sm"
+                            onPress={() => {
+                              field.onChange('');
+                              setManualReview(false);
+                              setCategoryPickerVisible(false);
+                              setCategorySearch('');
+                            }}
+                          />
+                          {filteredCategories.map((category) => (
+                            <Chip
+                              key={category.id}
+                              label={category.name}
+                              icon={categoryIcon(category.name)}
+                              selected={field.value === category.id}
+                              onPress={() => {
+                                field.onChange(category.id);
+                                setManualReview(false);
+                                setCategoryPickerVisible(false);
+                                setCategorySearch('');
+                              }}
+                            />
+                          ))}
+                          {!isEditing ? (
+                            <Button
+                              label="Service not listed"
+                              variant={manualReview ? 'secondary' : 'outline'}
+                              size="sm"
+                              onPress={() => {
+                                field.onChange('');
+                                setManualReview(true);
+                                setCategoryPickerVisible(false);
+                                setCategorySearch('');
+                              }}
+                            />
+                          ) : null}
+                        </View>
+                      )}
+                      {!categories.isLoading && !categories.isError && filteredCategories.length === 0 ? (
+                        <Text variant="bodySm" color={colors.textMuted}>
+                          No matching categories. Try another search or let AI choose.
+                        </Text>
+                      ) : null}
+                    </View>
+                  ) : null}
+                  {fieldState.error ? (
+                    <Text variant="labelMd" color={colors.danger}>{fieldState.error.message}</Text>
+                  ) : null}
+                </Card>
+              );
+            }}
           />
 
           <FormInput
             control={control}
             name="address"
-            label="Service Location"
+            label="Where should the professional go?"
             placeholder="742 Evergreen Terrace, Austin, TX 78704"
             leftIcon="location-on"
             autoComplete="street-address"
@@ -177,18 +262,6 @@ export default function CreateRequestScreen({
               render={({ field }) => <UrgencySelector value={field.value} onChange={field.onChange} />}
             />
           </View>
-
-          <Card variant="ai">
-            <View style={styles.aiNote}>
-              <Icon name="auto-awesome" size={18} color={colors.accentDark} />
-              <View style={styles.aiNoteText}>
-                <Text variant="labelLg">Automated Diagnostic Ready</Text>
-                <Text variant="bodySm" color={colors.textSecondary}>
-                  Our engine will analyse your description and pre-check qualified providers nearby.
-                </Text>
-              </View>
-            </View>
-          </Card>
 
           <FormError message={submitError} />
 
@@ -210,8 +283,19 @@ export default function CreateRequestScreen({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.base, paddingBottom: spacing.xxxl, gap: spacing.xl },
+  intro: { gap: spacing.xs },
   field: { gap: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  aiNote: { flexDirection: 'row', gap: spacing.md },
-  aiNoteText: { flex: 1, gap: 2 },
+  categoryCard: { gap: spacing.md },
+  categoryHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryLight,
+  },
+  categoryHeadingText: { flex: 1, gap: 2 },
+  categoryPicker: { gap: spacing.md },
 });

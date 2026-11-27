@@ -152,6 +152,22 @@ function countHits(text: string, words: string[]): number {
 }
 
 function classifyRequest(request: ServiceRequest): AIClassification {
+  if (request.needsManualReview) {
+    return {
+      requestId: request.id,
+      categoryName: 'Uncategorized',
+      predictedUrgency: request.urgency,
+      confidence: 0,
+      status: 'fallback',
+      layer: 'user',
+      details: {
+        reason: 'Manual review requested because no listed category matches.',
+        categories: CATEGORIES.map((category) => category.name),
+        safetyTips: [],
+      },
+    };
+  }
+
   // Only what the customer wrote: the title is generated and always names the category.
   const text = request.description;
   const chosen = request.categoryId ?? OTHER_ID;
@@ -194,6 +210,7 @@ function classifyRequest(request: ServiceRequest): AIClassification {
 // ----------------------------------------------------------------- matching
 
 function buildMatches(request: ServiceRequest): MatchResult {
+  if (request.needsManualReview) return { requestId: request.id, weights: WEIGHTS, providers: [] };
   // Match on the category the AI settled on, so this screen agrees with the AI result.
   const categoryId = classifyRequest(request).categoryId ?? OTHER_ID;
   const pool = PROVIDERS.filter((p) => categoryId === OTHER_ID || p.categoryIds.includes(categoryId));
@@ -267,7 +284,10 @@ function findOwned(id: string): ServiceRequest {
 }
 
 function validate(input: NewRequestInput): void {
-  if (!CATEGORIES.some((c) => c.id === input.categoryId)) throw mockError(422, 'categoryId: unknown category');
+  if (input.manualReview) return;
+  if (!input.categoryId || !CATEGORIES.some((c) => c.id === input.categoryId)) {
+    throw mockError(422, 'categoryId: unknown category');
+  }
 }
 
 export const mockRequestsGateway: RequestsGateway = {
@@ -296,6 +316,7 @@ export const mockRequestsGateway: RequestsGateway = {
       id: String(nextId++),
       customerId,
       categoryId: input.categoryId,
+      needsManualReview: input.manualReview,
       title: input.title,
       description: input.description,
       urgency: input.urgency,

@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { mockRequestsGateway } from '@/services/mock/requests';
 import { env } from '@/config/env';
 import { api } from '@/store/api';
@@ -27,8 +28,14 @@ const httpRequestsGateway: RequestsGateway = {
   getRequest: async (id) => (await http.get<ServiceRequest>(`/requests/${id}`)).data,
   createRequest: async (input) => (await http.post<ServiceRequest>('/requests', input)).data,
   updateRequest: async (id, input) => (await http.patch<ServiceRequest>(`/requests/${id}`, input)).data,
-  getClassification: async (requestId) =>
-    (await http.get<AIClassification>(`/requests/${requestId}/classification`)).data,
+  getClassification: async (requestId) => {
+    try {
+      return (await http.get<AIClassification>(`/requests/${requestId}/classification`)).data;
+    } catch (error) {
+      if (!isAxiosError(error) || error.response?.status !== 404) throw error;
+      return (await http.post<AIClassification>(`/requests/${requestId}/classify`)).data;
+    }
+  },
   getMatches: async (requestId) => {
     const result = (await http.get<MatchResult>(`/requests/${requestId}/matches`)).data;
     const scale = (value: number) => Math.round(value * 1000) / 10;

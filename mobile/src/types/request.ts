@@ -21,6 +21,7 @@ export interface ServiceRequest {
   id: ID;
   customerId: ID;
   categoryId?: ID;
+  needsManualReview?: boolean;
   selectedProviderId?: ID;
   title: string; // max 200
   description: string;
@@ -36,7 +37,8 @@ export interface ServiceRequest {
 }
 
 export interface NewRequestInput {
-  categoryId: ID;
+  categoryId?: ID;
+  manualReview?: boolean;
   title: string;
   description: string;
   urgency: Urgency;
@@ -53,7 +55,7 @@ export type ClassificationStatus = 'success' | 'failed' | 'fallback';
  * output_json so the AI result screen can render it.
  */
 export interface AIClassification {
-  layer?: 'model' | 'llm' | 'keyword' | 'user';
+  layer?: 'model' | 'llm' | 'keyword' | 'user' | 'admin';
   requestId: ID;
   categoryId?: ID;
   categoryName: string;
