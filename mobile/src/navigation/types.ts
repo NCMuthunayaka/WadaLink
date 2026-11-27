@@ -27,6 +27,18 @@ export type CustomerStackParamList = {
 };
 
 export type RootStackParamList = {
+  MatchingProviders: { requestId: string };
+  QuotationComparison: { requestId: string };
+  JobDetail: { requestId: string };
+  QuotationSubmission: { requestId: string };
+  Chat: { requestId: string };
+  Reviews: { requestId: string };
+  Notifications: undefined;
+  EquipmentCatalog: undefined;
+  EquipmentDetail: { equipmentId: string };
+  EquipmentForm: { equipmentId?: string } | undefined;
+  Reservations: undefined;
+
   // Signed out
   Auth: undefined;
   // Signed in (which one appears depends on getAccessState)
