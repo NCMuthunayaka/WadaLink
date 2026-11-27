@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import NotificationCenterScreen from '@/features/notifications/screens/NotificationCenterScreen';
+import { ConversationsScreen } from '@/features/jobs/screens/JobsScreen';
 import CustomerHomeScreen from '@/features/requests/screens/CustomerHomeScreen';
 import MyRequestsScreen from '@/features/requests/screens/MyRequestsScreen';
 import ProfileScreen from '@/features/profile/screens/ProfileScreen';
@@ -15,7 +15,7 @@ export default function CustomerTabs() {
     <Tab.Navigator screenOptions={tabBarScreenOptions}>
       <Tab.Screen name="Home" component={CustomerHomeScreen} options={{ tabBarIcon: tabIcon('home') }} />
       <Tab.Screen name="Jobs" component={MyRequestsScreen} options={{ tabBarIcon: tabIcon('work') }} />
-      <Tab.Screen name="Messages" component={NotificationCenterScreen} options={{ title: 'Updates', tabBarIcon: tabIcon('notifications') }} />
+      <Tab.Screen name="Messages" component={ConversationsScreen} options={{ title: 'Messages', tabBarIcon: tabIcon('chat-bubble-outline') }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: tabIcon('account-circle') }} />
     </Tab.Navigator>
   );

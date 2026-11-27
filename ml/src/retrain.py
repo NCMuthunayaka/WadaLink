@@ -47,6 +47,8 @@ def retrain(validation, approved=None):
         labels[key] = row
     rows = list(labels.values())
     valid = read_rows(validation)
+    if any(r.get('provenance', '').startswith('synthetic') for r in valid):
+        raise ValueError('Synthetic regression labels cannot authorize model promotion')
     if any(r['text'].strip().casefold() in labels for r in valid):
         raise ValueError('Validation overlaps training data')
     if 'other' not in {r['category'] for r in rows}:

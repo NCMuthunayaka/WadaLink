@@ -1,0 +1,42 @@
+{
+  "status": "implemented_and_locally_tested_with_external_verification_limits",
+  "completed": [
+    "Restored provider category proposal form with real API, validation, busy and result states",
+    "Fixed classifier artifact path: repository/ml/models rather than parent directory/ml/models",
+    "Reject low-confidence or inactive-category LLM suggestions",
+    "Conservative non-service intent guard before model and LLM",
+    "Neutral rating factor for providers without reviews",
+    "Price-only comparison uses the same distance-eligible providers as weighted matching",
+    "Synthetic scenario generator with provenance, split manifests, hashes and exact training-overlap rejection",
+    "Model, keyword and combined evaluation with classification metrics, confusion SVGs, timings and layer distribution",
+    "Fixed HVAC label normalization and offline evaluation monkey-patch leakage",
+    "Synthetic policy ranking evaluation using the actual matching service and isolated SQLite",
+    "Retraining refuses synthetic validation labels for model promotion",
+    "Rollback preservation, failure recovery, and authenticated request-classify-correct-match journeys tested"
+  ],
+  "evidence": {
+    "ai_tests_passed": 29,
+    "synthetic_in_scope_test_cases": 12,
+    "synthetic_out_of_scope_test_cases": 12,
+    "synthetic_development_cases": 6,
+    "combined_fixture_accuracy": 1.0,
+    "combined_fixture_out_of_scope_false_acceptance": 0.0,
+    "before_intent_guard_false_acceptance": 0.5,
+    "independent_human_accuracy": "not established",
+    "live_llm": "not configured: GROQ_API_KEY absent",
+    "ranking_superiority": "not established; weighted and price-only tied in these two synthetic preference scenarios"
+  },
+  "limitations": [
+    "Small authored benchmark covers plumbing, electrical and HVAC only; not a substitute for representative real-world validation",
+    "Intent guard was improved using these fixtures; resulting scores are regression evidence, not an untouched test estimate",
+    "Exact-overlap rejection does not prove semantic independence from the training corpus",
+    "No production model replaced, no synthetic examples marked human-reviewed, and no real customer text sent to an LLM",
+    "Live Groq verification requires configured credentials; smoke script is ready",
+    "Production latency, multi-process cache coordination and Android device journeys remain unverified"
+  ],
+  "commands_from_repository_root": {
+    "offline_regression": ".\\ml\\.venv\\Scripts\\python.exe ml/src/run_regression.py",
+    "live_probe": ".\\ml\\.venv\\Scripts\\python.exe ml/src/verify_live_llm.py",
+    "live_comparison_after_key_configuration": ".\\ml\\.venv\\Scripts\\python.exe ml/src/evaluate_system.py --test ml/data/evaluation/synthetic/test.csv --out-of-scope ml/data/evaluation/synthetic/out_of_scope.csv --output ml/reports/live-synthetic-run --with-llm"
+  }
+}

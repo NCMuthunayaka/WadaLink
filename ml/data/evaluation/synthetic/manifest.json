@@ -1,0 +1,20 @@
+{
+  "evidence_type": "synthetic_regression",
+  "independent_human_labels": false,
+  "limitations": "Small authored scenarios for three service families; no real-world accuracy or ranking superiority claim. Never promote using these labels.",
+  "training_sha256": "b8e82d7d951f5d4b7e8151aa423397b4cb910b8b0bebba1d99219c82f7809887",
+  "splits": {
+    "test": {
+      "rows": 12,
+      "sha256": "ad2d01bb0767d24dc2e279f43d828061c2824ae026857580e4c837fa51fb9d85"
+    },
+    "development": {
+      "rows": 6,
+      "sha256": "e9a8795a4fd48c5150e8506e85f0ff0c203eb198cbcef483e9bcee02120db6f1"
+    },
+    "out_of_scope": {
+      "rows": 12,
+      "sha256": "f610cf3116cf717fb0e11a2a47c0c23cc13e9394b7a735aa0d1c7c2977c18074"
+    }
+  }
+}

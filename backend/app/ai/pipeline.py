@@ -4,6 +4,7 @@ import json
 from app.ai.groq_classifier import classify as groq_classify
 
 from app.ai.keyword_fallback import classify_text
+from app.ai.scope import outside_service_scope
 
 try:
     import joblib
@@ -12,7 +13,7 @@ except ImportError:  # pragma: no cover
 
 
 class ClassificationPipeline:
-    model_path = Path(__file__).resolve().parents[4] / "ml" / "models" / "service-category.joblib"
+    model_path = Path(__file__).resolve().parents[3] / "ml" / "models" / "service-category.joblib"
 
     def __init__(self):
         self.thresholds = json.loads(Path(__file__).with_name("threshold.json").read_text())
@@ -41,6 +42,11 @@ class ClassificationPipeline:
     def _classify(self, title, description, categories):
         suggestions = list(categories or [])
         text = f"{title or ''} {description}".strip()
+        if outside_service_scope(text):
+            return {'category': 'User Picks', 'confidence': 0.0, 'urgency': 'medium',
+                    'status': 'fallback', 'layer': 'user', 'model_name': self.model_name,
+                    'details': {'safetyTips': [], 'categories': suggestions,
+                                'reason': 'This does not appear to be a service booking. Choose a category manually if you need a service professional.'}}
         if len(re.sub(r"\W", "", text)) < 8:
             return {
                 "category": "User Picks",
@@ -87,7 +93,7 @@ class ClassificationPipeline:
             result['status'] = 'fallback'
         if result['status'] != 'success':
             llm = groq_classify(text, categories or [])
-            if llm and llm['category'] not in {'new_service', 'unclear'}:
+            if llm and llm['category'] in (categories or []) and llm['confidence'] >= self.thresholds.get('llm_confidence', 0.65):
                 result.update(llm, layer='llm', status='success')
             elif llm and llm['category'] == 'new_service':
                 result.update(category='User Picks', layer='user', status='fallback', confidence=0.0)

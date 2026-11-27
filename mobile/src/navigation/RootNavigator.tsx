@@ -1,4 +1,14 @@
+import QuotationSubmissionScreen from '@/features/quotations/screens/QuotationSubmissionScreen';
+import NotificationsScreen from '@/features/notifications/screens/NotificationCenterScreen';
+import ReviewsScreen from '@/features/reviews/screens/ReviewsScreen';
+import ChatScreen from '@/features/chat/screens/ChatScreen';
+import JobDetailScreen from '@/features/jobs/screens/JobDetailScreen';
 import React, { useEffect } from 'react';
+import MatchingProvidersScreen from '@/features/matching/screens/MatchingProvidersScreen';
+import QuotationComparisonScreen from '@/features/quotations/screens/QuotationComparisonScreen';
+import { EquipmentCatalogScreen, EquipmentDetailScreen } from '@/features/equipment/screens/EquipmentFlowScreens';
+import EquipmentFormScreen from '@/features/equipment/screens/EquipmentFormScreen';
+import ReservationsScreen from '@/features/equipment/screens/ReservationsScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AccountGateScreen from '@/features/auth/screens/AccountGateScreen';
 import UIKitScreen from '@/features/dev/screens/UIKitScreen';
@@ -40,7 +50,20 @@ export default function RootNavigator() {
       {access === 'customer' ? <Stack.Screen name="CustomerApp" component={CustomerNavigator} /> : null}
       {access === 'provider' ? <Stack.Screen name="ProviderTabs" component={ProviderTabs} /> : null}
       {showGate ? <Stack.Screen name="AccountGate" component={AccountGateScreen} /> : null}
-      {__DEV__ && access !== null ? <Stack.Screen name="UIKit" component={UIKitScreen} /> : null}
+      {access !== null && !showGate && <Stack.Group>
+        <Stack.Screen name="MatchingProviders" component={MatchingProvidersScreen} />
+        <Stack.Screen name="QuotationComparison" component={QuotationComparisonScreen} />
+        <Stack.Screen name="JobDetail" component={JobDetailScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="Reviews" component={ReviewsScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="QuotationSubmission" component={QuotationSubmissionScreen} />
+        <Stack.Screen name="EquipmentCatalog" component={EquipmentCatalogScreen} />
+        <Stack.Screen name="EquipmentDetail" component={EquipmentDetailScreen} />
+        <Stack.Screen name="EquipmentForm" component={EquipmentFormScreen} />
+        <Stack.Screen name="Reservations" component={ReservationsScreen} />
+      </Stack.Group>}
+{__DEV__ && access !== null ? <Stack.Screen name="UIKit" component={UIKitScreen} /> : null}
     </Stack.Navigator>
   );
 }

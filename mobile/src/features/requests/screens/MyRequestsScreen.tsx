@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { FlatList, StyleSheet, View } from 'react-native';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
@@ -7,11 +8,12 @@ import Icon from '@/components/ui/Icon';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 import Text from '@/components/ui/Text';
 import { colors, spacing } from '@/constants/theme';
-import type { CustomerTabScreenProps } from '@/navigation/types';
+import type { RootStackParamList, CustomerTabScreenProps } from '@/navigation/types';
 import { useGetCategoriesQuery, useGetMyRequestsQuery } from '@/services/api/requests';
 import RequestCard from '../components/RequestCard';
 
 export default function MyRequestsScreen({ navigation }: CustomerTabScreenProps<'Jobs'>) {
+  const rootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
   const categories = useGetCategoriesQuery();
   const { data, isLoading, isError, isFetching, refetch } = useGetMyRequestsQuery();
 
@@ -42,7 +44,7 @@ export default function MyRequestsScreen({ navigation }: CustomerTabScreenProps<
             <RequestCard
               request={item}
               categoryName={categoryName(item.categoryId)}
-              onPress={() => navigation.navigate('MatchingProviders', { requestId: item.id })}
+              onPress={() => rootNavigation.navigate('JobDetail', { requestId: item.id })}
             />
           )}
           ListEmptyComponent={
