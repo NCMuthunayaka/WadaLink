@@ -2,9 +2,9 @@
 
 ## Audit status — 2026-11-22
 
-Checked against implementation code (backend app, models, services, routers, migrations, mobile/admin source, and ML source). `[x]` = implemented in code; `[~]` = partially implemented or has a material gap; `[ ]` = no sufficient implementation evidence, intentionally left unchanged. README claims and test-file presence alone were not treated as completion.
+This is the 2026-11-22 checklist snapshot. For the refreshed code-based status, evidence, and test results, see [audit_report.md](../audit_report.md).
 
-Based on the proposal (Group 12). Nothing is ticked: change `[ ]` to `[x]` yourself.
+The checkbox list below is a historical snapshot and should not be used as the current implementation status.
 AI work is one sub-category (section 3D) inside Module 2, not the centre of the project.
 
 Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda | **[M4]** Alahakoon | **[ALL]** everyone

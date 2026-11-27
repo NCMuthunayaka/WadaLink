@@ -3,32 +3,32 @@
 | Section | Items | DONE | PARTIAL | MISSING | CANNOT VERIFY | Completion |
 |---|---:|---:|---:|---:|---:|---:|
 | 0 Decisions | 10 | 4 | 2 | 4 | 0 | 50.0% |
-| 1 Foundation | 32 | 8 | 11 | 3 | 10 | 42.2% |
-| 2 Module 1 | 36 | 26 | 1 | 9 | 0 | 73.6% |
-| 3 Module 2 | 51 | 41 | 7 | 3 | 0 | 88.2% |
-| 4 Module 3 | 29 | 9 | 1 | 19 | 0 | 32.8% |
-| 5 Module 4 | 36 | 20 | 2 | 14 | 0 | 58.3% |
-| 6 Integration | 10 | 0 | 1 | 9 | 0 | 5.0% |
+| 1 Foundation | 32 | 10 | 9 | 3 | 10 | 45.3% |
+| 2 Module 1 | 36 | 33 | 1 | 2 | 0 | 93.1% |
+| 3 Module 2 | 51 | 41 | 7 | 3 | 0 | 87.3% |
+| 4 Module 3 | 29 | 21 | 4 | 4 | 0 | 79.3% |
+| 5 Module 4 | 36 | 26 | 2 | 8 | 0 | 75.0% |
+| 6 Integration | 10 | 1 | 8 | 1 | 0 | 50.0% |
 | 7 Non-functional | 8 | 1 | 1 | 6 | 0 | 18.8% |
-| 8 Security | 14 | 2 | 0 | 12 | 0 | 14.3% |
-| 9 Testing | 34 | 0 | 3 | 31 | 0 | 4.4% |
+| 8 Security | 14 | 2 | 4 | 8 | 0 | 28.6% |
+| 9 Testing | 34 | 0 | 4 | 30 | 0 | 5.9% |
 | 10 CI/CD | 14 | 1 | 0 | 13 | 0 | 7.1% |
 | 11 Documentation | 17 | 1 | 0 | 16 | 0 | 5.9% |
 | 12 Journal | 7 | 0 | 0 | 7 | 0 | 0.0% |
 | 13 Proposal fixes | 9 | 0 | 0 | 9 | 0 | 0.0% |
-| **TOTAL** | **307** | **113** | **29** | **155** | **10** | **41.5%** |
+| **TOTAL** | **307** | **141** | **42** | **114** | **10** | **52.8%** |
 
 ## Audit basis
 
-Audited 2026-11-22. Completion is `(DONE + 0.5 x PARTIAL) / total`; CANNOT VERIFY contributes zero. The ordered checklist below is the full item list. Backend findings require route registration, validation, and available tests; frontend findings require reachability and a real API; database DONE requires model plus schema/migration.
+Audited 2026-11-27 against the current worktree. Completion is `(DONE + 0.5 x PARTIAL) / total`; CANNOT VERIFY contributes zero. The ordered checklist below is the full item list. Backend findings require registered routes and implementation evidence; frontend findings require reachable screens and API wiring; database DONE requires model plus migration/schema evidence. Passing focused tests is recorded separately and is not treated as proof of end-to-end completion.
 
 ## Full item list
 
-## Audit status — 2026-11-22
+## Audit status — 2026-11-27
 
 Checked against implementation code (backend app, models, services, routers, migrations, mobile/admin source, and ML source). `[x]` = implemented in code; `[~]` = partially implemented or has a material gap; `[ ]` = no sufficient implementation evidence, intentionally left unchanged. README claims and test-file presence alone were not treated as completion.
 
-Based on the proposal (Group 12). Nothing is ticked: change `[ ]` to `[x]` yourself.
+Based on the proposal (Group 12). Statuses below describe evidence in the current repository, not completion claims from the proposal.
 AI work is one sub-category (section 3D) inside Module 2, not the centre of the project.
 
 Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda | **[M4]** Alahakoon | **[ALL]** everyone
@@ -116,7 +116,7 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Provider profile CRUD — `/api/v1/users/me` and `/api/v1/users/me/provider` GET/PATCH update provider profile fields and preserve approval status.
 - **DONE** Provider approval status in the profile
 - **DONE** Create service request
-- **MISSING** List and view own requests
+- **DONE** List and view own requests — `/api/v1/requests` and `/api/v1/requests/{request_id}` are scoped to the authenticated customer.
 - **DONE** Update request status
 - **DONE** Cancel a request
 - **DONE** Provider job discovery (open requests in the provider's categories) — `/api/v1/providers/jobs` filters open requests by the authenticated provider's service categories.
@@ -127,14 +127,14 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Customer registration page — [mobile/src/features/auth/screens/RegisterScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/RegisterScreen.tsx) is reachable from `AuthNavigator` through `RoleSelection`; `register` dispatches the real `POST /api/v1/auth/register` gateway by default.
 - **DONE** Provider registration page — the same reachable `RegisterScreen` accepts the provider role and calls the real auth gateway with `role: 'provider'`.
 - **DONE** Login and logout — [mobile/src/features/auth/screens/LoginScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/LoginScreen.tsx) is registered in `AuthNavigator` and dispatches the real `POST /api/v1/auth/login`; `logout` clears the token and API state in [mobile/src/store/sessionSlice.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/store/sessionSlice.ts).
-- **MISSING** Customer profile page
-- **MISSING** Provider profile page
-- **MISSING** Provider approval status view
+- **DONE** Customer profile page — the Profile tab reads and updates `/api/v1/users/me`.
+- **DONE** Provider profile page — the Profile tab reads and updates provider details and service categories.
+- **DONE** Provider approval status view — Profile displays the approval status returned by the user API.
 - **DONE** Service request form (description, location, urgency) — [mobile/src/features/requests/screens/CreateRequestScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/CreateRequestScreen.tsx) is reachable from `CustomerHomeScreen`/`CustomerTabs` and uses the real request API gateway by default.
 - **DONE** My requests list — [mobile/src/features/requests/screens/MyRequestsScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/MyRequestsScreen.tsx) is registered as the customer Jobs tab and calls `useGetMyRequestsQuery`.
-- **MISSING** Request detail and status page
-- **MISSING** Provider job discovery page
-- **MISSING** Provider job dashboard (my jobs and status)
+- **DONE** Request detail and status page — the customer Jobs screen opens the shared job-detail screen, where a customer can inspect and cancel an open request.
+- **DONE** Provider job discovery page — provider Jobs switches between discovery and the provider's own jobs, using the authenticated provider APIs.
+- **DONE** Provider job dashboard (my jobs and status) — provider Home/Jobs show current work and support start/complete actions.
 - **DONE** Loading, empty and error states — `CustomerHomeScreen`, `MyRequestsScreen`, `CreateRequestScreen`, and matching screens contain explicit loading, empty, retry, and error UI components.
 - **MISSING** Responsive layout
 
@@ -208,7 +208,7 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 ### Database
 - **DONE** `equipment`
 - **DONE** `equipment_reservations`
-- **MISSING** Status field (Available, Reserved, Returned)
+- **DONE** Status field — equipment and reservations have explicit lifecycle status enums, including available, reserved, in-rent, return-pending, returned, and cancelled.
 
 ### Backend
 - **DONE** Add equipment
@@ -216,30 +216,30 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** List and search equipment (name, category, availability)
 - **DONE** Reserve equipment with dates
 - **DONE** Date conflict and double-booking check
-- **PARTIAL** Database transaction for every status change
-- **MISSING** Available to Reserved
-- **MISSING** Reserved to Returned
-- **DONE** Block invalid status changes
-- **MISSING** Rental history per provider
+- **PARTIAL** Database transaction for every status change — writes are committed, but reservation overlap checks and status transitions are not protected by a concurrency-safe transaction/locking strategy.
+- **DONE** Available to Reserved — reservation creation marks equipment reserved and creates the reservation.
+- **PARTIAL** Reserved to Returned — pickup, return-pending, and returned states are implemented, but the service accepts any allowed status from any prior state rather than enforcing a transition graph.
+- **PARTIAL** Block invalid status changes — unknown status values are rejected, but out-of-order transitions among valid statuses are not.
+- **DONE** Rental history per provider — `/api/v1/reservations/fleet` returns reservations for the authenticated provider's equipment.
 - **DONE** Link a reservation to a service job
 - **MISSING** Late-return rule (notification or penalty, decide)
 - **MISSING** Notification on reservation and return
 
 ### Frontend
-- **MISSING** Equipment listing form
-- **MISSING** My equipment page
-- **MISSING** Browse and search page
-- **MISSING** Equipment detail page
-- **MISSING** Reservation form
-- **MISSING** My reservations with status
-- **MISSING** Return confirmation
-- **MISSING** Rental history view
-- **MISSING** Loading, empty and error states
+- **DONE** Equipment listing form — provider fleet links to a create/edit form using the HTTP API.
+- **DONE** My equipment page — the provider Equipment tab loads and searches the owner's fleet.
+- **DONE** Browse and search page — the customer equipment catalog supports name/category filtering.
+- **DONE** Equipment detail page — details and current status are displayed before booking.
+- **DONE** Reservation form — customers select dates and submit a reservation through the API.
+- **DONE** My reservations with status — customer reservations and provider fleet reservations show lifecycle states.
+- **DONE** Return confirmation — providers explicitly confirm inspected returns before the equipment becomes available.
+- **DONE** Rental history view — the reservations screen separates active reservations from returned/cancelled history.
+- **DONE** Loading, empty and error states — these screens use shared remote loading/error/empty UI.
 
 ### Tests
-- **MISSING** Status lifecycle unit tests
+- **DONE** Status lifecycle unit tests — tests cover reserved → in-rent → return-pending → returned and owner authorization.
 - **MISSING** Two providers booking the same item (concurrency)
-- **MISSING** Availability accuracy check
+- **PARTIAL** Availability accuracy check — overlapping reservations are rejected in unit tests; boundary/concurrency accuracy is not established.
 - **MISSING** End-to-end rental test
 
 ---
@@ -258,19 +258,19 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Send and fetch message APIs
 - **DONE** Real-time delivery (WebSocket or polling)
 - **DONE** Hide personal contact details — chat responses expose message/request/user IDs and text only; phone/email fields are not serialized.
-- **MISSING** Chat UI
+- **DONE** Chat UI — the registered job conversation screen fetches and sends messages and refreshes by polling.
 - **MISSING** Access control tests
 
 ### Notifications
 - **PARTIAL** Notification engine with event hooks
-- **MISSING** In-app: new quotation
-- **MISSING** In-app: provider selected
-- **MISSING** In-app: job status change
+- **DONE** In-app: new quotation — quotation submission creates a customer notification.
+- **DONE** In-app: provider selected — selecting a quotation notifies the selected provider.
+- **PARTIAL** In-app: job status change — job start, completion, and request cancellation create notifications; event coverage is not complete for all status transitions.
 - **MISSING** In-app: equipment reservation
 - **MISSING** Email (SMTP) for the same events
 - **MISSING** SMTP account and credentials in `.env`
 - **MISSING** Email templates
-- **PARTIAL** Notification center with unread count
+- **DONE** Notification center with unread count — the registered screen lists notifications and computes unread count from loaded records.
 - **DONE** Mark as read — `POST /api/v1/notifications/{notification_id}/read` is scoped to the authenticated notification owner.
 - **MISSING** App keeps working if SMTP fails
 
@@ -279,7 +279,7 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Provider reviews customer after completion — the same endpoint resolves the customer target for the selected provider.
 - **DONE** One review per job per side — the unique `(request_id, reviewer_id)` constraint and route-level duplicate check enforce one review per participant.
 - **DONE** Review APIs
-- **MISSING** Review form and review list
+- **DONE** Review form and review list — the registered screen lists reviews and supports submitting one after job completion.
 - **DONE** Average rating feeds into ranking
 
 ### Admin
@@ -296,15 +296,15 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 
 ## 6. Integration
 
-- **PARTIAL** [ALL] Frontend, backend and MySQL connected
-- **MISSING** [ALL] Customer flow works: request, category, providers, quotations, select, chat, complete, review
-- **MISSING** [ALL] Provider flow works: register, approval, find jobs, quote, chat, complete, review
-- **MISSING** [ALL] Equipment rental linked to a job
-- **MISSING** [ALL] Reviews update ranking scores
-- **MISSING** [ALL] Notifications fire from every module
-- **MISSING** [ALL] Admin approval gates provider activity
-- **MISSING** [ALL] Feature-complete integration
-- **MISSING** [ALL] Whole app works when the LLM is unavailable
+- **PARTIAL** [ALL] Frontend, backend and database connected — mobile/admin clients call the FastAPI API; runtime uses PostgreSQL/Neon, not the proposal's MySQL.
+- **PARTIAL** [ALL] Customer flow works: request, category, providers, quotations, select, chat, complete, review — the individual API/UI paths are present, but no end-to-end journey evidence was found and customer completion is provider-driven.
+- **PARTIAL** [ALL] Provider flow works: register, approval, find jobs, quote, chat, complete, review — these paths are represented in code, but no end-to-end journey evidence was found.
+- **PARTIAL** [ALL] Equipment rental linked to a job — the reservation model supports an optional related request, but the mobile reservation flow does not submit that link.
+- **DONE** [ALL] Reviews update ranking scores — matching reads current review data when calculating provider ratings.
+- **PARTIAL** [ALL] Notifications fire from every module — quotation, selection, start/completion, and cancellation events are wired; equipment reservation/return and email are not.
+- **PARTIAL** [ALL] Admin approval gates provider activity — matching and quotation submission require approved providers; broader provider endpoints need a complete gate audit.
+- **PARTIAL** [ALL] Feature-complete integration — substantial module paths are connected, but end-to-end tests, email/push, and other listed gaps remain.
+- **PARTIAL** [ALL] Whole app works when the LLM is unavailable — classification has model/keyword/manual fallback and request creation survives classification failure; a whole-app outage test is absent.
 - **MISSING** [ALL] Shared seed script with demo data
 
 ---
@@ -326,15 +326,15 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 
 - **DONE** [ALL] Passwords hashed, never logged
 - **MISSING** [ALL] Secrets only in environment variables
-- **MISSING** [ALL] RBAC on every protected endpoint
-- **MISSING** [ALL] Input validation on every field
-- **MISSING** [ALL] SQL injection and XSS protection
+- **PARTIAL** [ALL] RBAC on every protected endpoint — authenticated role/ownership guards exist across the main routes; a complete endpoint-by-endpoint authorization test is absent.
+- **PARTIAL** [ALL] Input validation on every field — Pydantic request schemas validate many API inputs, but universal validation coverage is not demonstrated.
+- **PARTIAL** [ALL] SQL injection and XSS protection — ORM queries and React text rendering are used; no dedicated injection/XSS verification is recorded.
 - **MISSING** [ALL] CSRF check
 - **DONE** [ALL] CORS limited to the frontend
 - **MISSING** [ALL] Rate limiting on login and request endpoints
 - **MISSING** [ALL] HTTPS in production
 - **MISSING** [ALL] No personal data in logs
-- **MISSING** [ALL] Contact details hidden between users
+- **PARTIAL** [ALL] Contact details hidden between users — chat responses do not serialize contact fields, but a full cross-feature exposure audit is not recorded.
 - **MISSING** [ALL] Account deletion and data export, or a note that it is out of scope
 - **MISSING** [ALL] AI ethics notes (fair ranking, explainability, human review)
 - **MISSING** [ALL] Terms and consent text
@@ -344,10 +344,10 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 ## 9. Testing
 
 ### Unit tests
-- **MISSING** [M1] Auth, profile and request tests
+- **PARTIAL** [M1] Auth, profile and request tests — auth, request, provider job, and dashboard tests exist; profile CRUD coverage is incomplete.
 - **PARTIAL** [M2] Ranking, quotation and classifier tests
 - **PARTIAL** [M3] Equipment tests
-- **MISSING** [M4] Chat, notification, review and admin tests
+- **MISSING** [M4] Chat, notification, review and admin tests — no focused tests for these new routes were found.
 - **PARTIAL** [ALL] API tests (PyTest and Postman collection)
 - **MISSING** [ALL] Frontend component tests
 
@@ -465,23 +465,23 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - AI resilience: [backend/app/services/classification_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/classification_service.py) performs five-minute result caching, a 60-per-customer hourly limit, and logs fallback outcomes; [backend/app/ai/groq_classifier.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/groq_classifier.py) performs PII scrubbing, JSON validation, timeout handling, and one retry.
 - AI evaluation evidence: `ml/src/evaluate.py` completed source-holdout evaluation and refreshed [ml/reports/leave_one_source_out.csv](D:/SUSL/SE%20SEM%2005/WadaLinik/ml/reports/leave_one_source_out.csv) with accuracies Claude 0.7624, Gemini 0.8141, and GPT 0.8588; [ml/reports/worst_predictions.csv](D:/SUSL/SE%20SEM%2005/WadaLinik/ml/reports/worst_predictions.csv) was refreshed for error review. `ml/src/compare_baselines.py` ran successfully: word TF-IDF + LogisticRegression 0.8615, word TF-IDF + LinearSVC 0.9060, char TF-IDF + LogisticRegression 0.8496, char TF-IDF + LinearSVC 0.9043. These are development/source-holdout results, not the required human/out-of-scope acceptance evaluation.
 - Matching: [backend/app/services/matching_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/matching_service.py) implements `MatchingService.match`; [backend/app/api/v1/matching.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/matching.py) exposes matching routes.
-- Frontend: [mobile/src/navigation/RootNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/RootNavigator.tsx) routes customer/provider states; [mobile/src/config/env.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/config/env.ts) defaults to mock mode; [admin/src/App.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/admin/src/App.tsx) calls the admin API.
+- Frontend: [mobile/src/navigation/RootNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/RootNavigator.tsx) routes customer/provider states; [mobile/src/config/env.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/config/env.ts) selects HTTP unless `EXPO_PUBLIC_USE_MOCK=true`; [admin/src/App.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/admin/src/App.tsx) calls the admin API. The mobile example env intentionally enables mock mode, so local setup must override it for backend integration.
 - Auth/landing UI: [mobile/src/navigation/AuthNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/AuthNavigator.tsx) reaches `Landing`, `Login`, `RoleSelection`, and `Register`; [mobile/src/features/auth/screens/LandingScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/auth/screens/LandingScreen.tsx) provides the landing UI. Auth uses the real API by default because `EXPO_PUBLIC_USE_MOCK` must explicitly equal `true` to select mock mode.
-- Additional UI audit: [mobile/src/navigation/CustomerTabs.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/CustomerTabs.tsx) reaches the customer home and Jobs screens; [mobile/src/navigation/CustomerNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/CustomerNavigator.tsx) reaches request creation, AI review, and provider matching. Provider Home/Jobs/Messages and customer/provider Messages remain `PlaceholderScreen` routes. `EquipmentManagementScreen` is reachable and reads real equipment APIs, but its Add Equipment action is an alert and `AddEquipmentScreen` is not registered.
-- Database: models are under [backend/app/models/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/models/), migrations under [backend/alembic/versions/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/alembic/versions/), and the MySQL schema is [database/schema.sql](D:/SUSL/SE%20SEM%2005/WadaLinik/database/schema.sql). Runtime configuration in [backend/app/core/config.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/core/config.py) and [docker-compose.yml](D:/SUSL/SE%20SEM%2005/WadaLinik/docker-compose.yml) uses PostgreSQL/Neon.
+- Additional UI audit: [mobile/src/navigation/CustomerTabs.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/CustomerTabs.tsx), [mobile/src/navigation/ProviderTabs.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/ProviderTabs.tsx), and [mobile/src/navigation/RootNavigator.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/navigation/RootNavigator.tsx) now reach customer requests, provider jobs, equipment, chat, notifications, quotations, and reviews. The current mobile TypeScript check fails because [mobile/src/features/profile/screens/ProfileScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/profile/screens/ProfileScreen.tsx) imports `CategoryProposalForm` twice. Reservation screens use direct HTTP calls; the older [mobile/src/services/api/reservations.ts](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/services/api/reservations.ts) still targets legacy `/equipment-reservations` endpoints and is not the path used by the current screen.
+- Database: models are under [backend/app/models/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/models/) and migrations under [backend/alembic/versions/](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/alembic/versions/). Runtime configuration in [backend/app/core/config.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/core/config.py) and [docker-compose.yml](D:/SUSL/SE%20SEM%2005/WadaLinik/docker-compose.yml) uses PostgreSQL/Neon, which differs from the original MySQL proposal.
 
-## Top 15 gaps to fix first
+## Highest-priority remaining gaps
 
-1. Align PostgreSQL/Neon runtime configuration with the required MySQL schema and migrations.
-2. Install/declare pytest and execute the backend suite.
-3. Add integration and access-control tests for the new profile, review, notification, chat, and admin routes.
-4. Replace equipment/reservation query-string identity defaults with authenticated ownership checks.
-5. Complete customer/provider request listing, profile CRUD, discovery, selection, and status flows.
-6. Make the mobile client real-API-backed by default; several gateways are mock-only.
-7. Add selected-provider chat authorization, UI, and access-control tests.
-8. Add human/out-of-scope AI evaluation data and metrics.
-9. Add frontend tests and fix the admin lint error.
-10. Add comprehensive RBAC, malformed-input, rate-limit, PII, and HTTPS tests.
+1. Fix the duplicate `CategoryProposalForm` import and rerun mobile typecheck.
+2. Enforce an explicit reservation status-transition graph and protect overlapping bookings against concurrent requests.
+3. Add authorization and integration tests for profile, chat, notification, review, and admin routes.
+4. Add reservation/return notification events and exercise the notification flows.
+5. Connect reservation creation to an optional service request in the mobile flow, if that remains in scope.
+6. Add complete customer/provider/admin end-to-end tests; the 46 passing tests are focused backend tests only.
+7. Add human and out-of-scope AI evaluation data and publish final evaluation metrics.
+8. Complete the endpoint-by-endpoint RBAC, input validation, privacy, and rate-limit verification.
+9. Resolve the project's PostgreSQL/Neon runtime versus MySQL proposal/schema decision.
+10. Add frontend component tests and check the admin lint issue reported in the previous audit.
 11. Establish CI/CD, deployment, smoke, monitoring, and backup evidence.
 12. Complete documentation, signed journal, mentor, acceptance, and proposal-alignment evidence.
 
@@ -489,32 +489,27 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 
 - Repository folder is WadaLink, while code/README use WedaLink and the checklist alternates ServiceLink/WedaLink.
 - The checklist says web-only, but the repository includes an Expo React Native mobile application.
-- The checklist requires MySQL, while backend config and docker-compose use PostgreSQL/Neon; `database/schema.sql` is MySQL.
-- Mobile defaults to mock mode and leaves request paths on mocks, conflicting with the real-API frontend rule.
-- Required classifier output is category/confidence/layer; `ClassificationResponse` exposes no `layer`.
-- Quotations/chat/notifications/reviews/providers route files exist, but are omitted from the registered router in [backend/app/api/v1/__init__.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/__init__.py); only auth, equipment, reservation, classification, matching, request, and AI-admin routers are included.
+- The checklist requires MySQL, while backend config and docker-compose use PostgreSQL/Neon.
+- Mobile supports mock and HTTP gateways. HTTP is selected unless `EXPO_PUBLIC_USE_MOCK=true`; the sample env file sets mock mode, so deployment/setup values matter.
+- `ClassificationResponse` now exposes `layer`; the earlier finding that it did not is obsolete.
+- Quotations, users, providers, chat, notifications, reviews, and admin routers are now included in [backend/app/api/v1/__init__.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/api/v1/__init__.py); the earlier route-registration finding is obsolete.
 - Admin is a single AI review page, not the complete customer/provider web shell described by the checklist.
 
 ## Test run results
 
-| Target | Command | Result | Passed | Failed | Skipped | Notes |
+| Target | Command (run 2026-11-27) | Result | Passed | Failed | Skipped | Notes |
 |---|---|---|---:|---:|---:|---|
-| Backend full suite | `ml\.venv\Scripts\python.exe -m pytest -q` | PARTIAL | 18 | 0 | 0 | 1 setup error in `backend/tests/unit/test_ai_resilience.py::test_rollback_preserves_previous_model`; pytest could not access the host temp directory (`WinError 5`). |
-| Backend AI focused suite | `ml\.venv\Scripts\python.exe -m pytest tests/unit/test_ai_classification.py tests/unit/test_groq_fallback.py -q` | PASS | 6 | 0 | 0 | Classifier, keyword fallback, LLM retry/validation, PII scrubbing, timeout recovery, and manual fallback tests passed. |
-| Backend implementation focused suite | `ml\.venv\Scripts\python.exe -m pytest tests/unit/test_ai_classification.py tests/unit/test_groq_fallback.py tests/unit/test_equipment_and_reservations.py -q` | PASS | 9 | 0 | 0 | AI and equipment/reservation tests passed after Module 2 changes. |
-| Admin | `cd admin; npm run build` | PASS | N/A | 0 | N/A | TypeScript/Vite build completed. |
-| Admin | `cd admin; npm run lint` | FAIL | 0 | 1 | 0 | One `react-hooks/set-state-in-effect` error in `admin/src/App.tsx`. |
-| Mobile | `cd mobile; npm run typecheck` | PASS | N/A | 0 | N/A | `tsc --noEmit` exited 0. |
-| Mobile | `cd mobile; npm run lint` | PASS WITH WARNINGS | N/A | 0 | 14 | Expo lint completed with 0 errors and 14 warnings. |
-| ML | `cd ml; .venv\\Scripts\\python.exe -m src.evaluate --help` | PASS | N/A | 0 | N/A | Evaluation module accepted `--help` in the bundled ML environment. |
-| AI sample | `ClassificationPipeline().classify(...)` | PASS | N/A | 0 | N/A | Loaded `tfidf-logistic-v1`; pipeline returns category, confidence, status, and `layer`; threshold gates and fallbacks are present. |
+| Backend focused modules | `cd backend; ..\\ml\\.venv\\Scripts\\python.exe -m pytest tests\\unit\\test_equipment_and_reservations.py tests\\m1\\test_requests.py tests\\m1\\test_provider_jobs.py tests\\m1\\test_provider_dashboard.py tests\\unit\\test_quotations.py -q` | PASS | 46 | 0 | 0 | Reservation/equipment, request, provider job/dashboard, and quotation tests passed; pytest emitted a cache permission warning. |
+| Mobile | `cd mobile; npm run typecheck` | FAIL | 0 | 1 | 0 | TypeScript reported TS2300 duplicate identifier `CategoryProposalForm` on lines 2 and 3 of `src/features/profile/screens/ProfileScreen.tsx`. |
+
+Admin build/lint, the full backend suite, mobile lint, AI evaluation, and end-to-end flows were not rerun as part of this refresh; results from the 2026-11-22 audit should not be read as current validation.
 
 ## CANNOT VERIFY items
 
-Live deployment, production database, branch protection, Jira/GitHub boards, sprint and meeting records, signed journal/approvals, real-user studies, surveys, browser/device matrix, performance/concurrency/ZAP scans, production smoke/backup/monitoring, and viva/contribution claims cannot be verified from this repository. They remain conservatively represented as MISSING in the summary; external evidence is still required.
+Live deployment, production database, branch protection, Jira/GitHub boards, sprint and meeting records, signed journal/approvals, real-user studies, surveys, browser/device matrix, performance/concurrency/ZAP scans, production smoke/backup/monitoring, and viva/contribution claims cannot be verified from this repository. They are counted separately as CANNOT VERIFY and contribute zero to completion; external evidence is still required.
 
 ## Post-audit database remediation
 
-The legacy MySQL `database/schema.sql` was removed. The initial Alembic migration was converted to PostgreSQL-native types, and `alembic upgrade head` was applied successfully to the configured Neon database; `alembic current` verified revision `6f7a8b9c0123`.
+Historical note from the 2026-11-22 audit: the legacy MySQL `database/schema.sql` was removed. The initial Alembic migration was converted to PostgreSQL-native types, and `alembic upgrade head` was applied successfully to the configured Neon database; `alembic current` verified revision `6f7a8b9c0123`. These remote database operations were not repeated during this refresh.
 
 The equipment reservation renter relationship was subsequently corrected: `renter_provider_id` was migrated to `renter_customer_id`, with a foreign key to `customers.customer_id`. Reservation creation and `/my` now use the authenticated customer identity, and reservation status updates require the authenticated provider to own the equipment. Alembic now reports head revision `7g8h9i0j1k2l`, and live Neon inspection verified `renter_customer_id -> customers.customer_id`.
