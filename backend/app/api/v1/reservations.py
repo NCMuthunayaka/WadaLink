@@ -73,6 +73,14 @@ def get_my_reservations(
     return ReservationService.get_user_reservations(db=db, user_id=current_user.user_id)
 
 
+@router.get("/fleet", response_model=List[ReservationResponse])
+def fleet_reservations(db: Session = Depends(get_db), user: User = Depends(require_role("provider"))):
+    from app.models.equipment import Equipment
+    from app.models.equipment_reservation import EquipmentReservation
+    rows = db.query(EquipmentReservation).join(Equipment, Equipment.equipment_id == EquipmentReservation.equipment_id).filter(Equipment.owner_provider_id == user.user_id).order_by(EquipmentReservation.reservation_id.desc()).all()
+    return [ReservationService._to_response(db, row) for row in rows]
+
+
 @router.get("/{reservation_id}", response_model=ReservationResponse)
 def get_reservation_detail(
     reservation_id: int,

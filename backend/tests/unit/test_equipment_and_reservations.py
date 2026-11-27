@@ -41,6 +41,28 @@ def make_equipment(name="FLIR E8-XT Thermal Camera", price=45.0):
     return EquipmentCreate(name=name, category="Diagnostic & Inspection", description="Professional thermal imager", price_per_day=price, deposit=150.0)
 
 
+def test_equipment_routes_scope_fleet_to_authenticated_owner(db_session):
+    from app.api.v1.equipment import create_equipment_listing, get_provider_fleet
+    from app.api.v1.reservations import fleet_reservations
+
+    owner = db_session.get(User, 1)
+    other = User(user_id=3, full_name="Other provider", email="other@test.com",
+                 password_hash="test", role=UserRole.PROVIDER, account_status=AccountStatus.ACTIVE)
+    db_session.add(other)
+    db_session.flush()
+    db_session.add(Provider(provider_id=3))
+    db_session.commit()
+    equipment = create_equipment_listing(make_equipment(), current_user=owner, db=db_session)
+    assert equipment.owner_id == owner.user_id
+    assert len(get_provider_fleet(current_user=owner, db=db_session)) == 1
+    assert get_provider_fleet(current_user=other, db=db_session) == []
+    start = datetime.now() + timedelta(days=1)
+    ReservationService.create_reservation(db_session, ReservationCreate(
+        equipment_id=equipment.id, start_date=start, end_date=start + timedelta(days=1)), renter_id=2)
+    assert len(fleet_reservations(db=db_session, user=owner)) == 1
+    assert fleet_reservations(db=db_session, user=other) == []
+
+
 def test_equipment_crud(db_session):
     equipment = EquipmentService.create_equipment(db_session, make_equipment(), owner_id=1)
     assert equipment.equipment_id is not None
