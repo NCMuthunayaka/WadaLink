@@ -1,0 +1,197 @@
+{
+  "evidence_type": "synthetic_regression",
+  "independent_human_labels_verified": false,
+  "limitations": "These metrics do not establish production accuracy or justify automatic model promotion.",
+  "input_sha256": {
+    "ml\\data\\evaluation\\synthetic\\test.csv": "ad2d01bb0767d24dc2e279f43d828061c2824ae026857580e4c837fa51fb9d85",
+    "ml\\data\\evaluation\\synthetic\\out_of_scope.csv": "f610cf3116cf717fb0e11a2a47c0c23cc13e9394b7a735aa0d1c7c2977c18074"
+  },
+  "llm_enabled": false,
+  "combined": {
+    "in_scope": {
+      "electrical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "hvac": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "plumbing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      }
+    },
+    "labels": [
+      "electrical",
+      "hvac",
+      "plumbing"
+    ],
+    "confusion_matrix": [
+      [
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        4
+      ]
+    ],
+    "oos_false_acceptance": 0.5,
+    "mean_seconds": 0.5749476291700072,
+    "layer_percentages": {
+      "keyword": 75.0,
+      "user": 25.0
+    }
+  },
+  "keyword": {
+    "in_scope": {
+      "electrical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "hvac": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "plumbing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      }
+    },
+    "labels": [
+      "electrical",
+      "hvac",
+      "plumbing"
+    ],
+    "confusion_matrix": [
+      [
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        4
+      ]
+    ],
+    "oos_false_acceptance": 0.5,
+    "mean_seconds": 0.00044113749512083206,
+    "layer_percentages": {
+      "keyword": 100.0
+    }
+  },
+  "model": {
+    "in_scope": {
+      "electrical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "hvac": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "plumbing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      }
+    },
+    "labels": [
+      "electrical",
+      "hvac",
+      "plumbing"
+    ],
+    "confusion_matrix": [
+      [
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        4
+      ]
+    ],
+    "oos_false_acceptance": 0.6666666666666666,
+    "mean_seconds": 0.003085858334088698,
+    "layer_percentages": {
+      "model": 100.0
+    }
+  }
+}

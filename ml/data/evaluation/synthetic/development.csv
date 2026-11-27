@@ -1,0 +1,7 @@
+text,category,provenance,scenario_id
+Water escapes from the pipe beneath my kitchen sink whenever I turn on the tap.,plumbing,synthetic_scenario,plumbing-0
+The toilet cistern keeps filling and overflowing after every flush.,plumbing,synthetic_scenario,plumbing-1
+The circuit breaker trips whenever the kitchen socket is used.,electrical,synthetic_scenario,electrical-0
+Please replace exposed electrical wiring behind the living room switch.,electrical,synthetic_scenario,electrical-1
+The air conditioner runs but the bedroom never becomes cool.,hvac,synthetic_scenario,hvac-0
+Please service the AC compressor and clean the indoor cooling unit.,hvac,synthetic_scenario,hvac-1

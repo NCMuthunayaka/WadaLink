@@ -40,9 +40,6 @@ class MatchingService:
         if request.category_id:
             query = query.filter(Provider.service_categories.any(category_id=request.category_id))
         rows = query.all()
-        price_baseline = [provider.provider_id for provider, _ in sorted(
-            rows, key=lambda pair: (pair[0].hourly_rate is None, float(pair[0].hourly_rate or 0), pair[0].provider_id)
-        )[:20]]
         results = []
         for provider, user in rows:
             rating, count = db.query(func.avg(Review.rating), func.count(Review.review_id)).filter(Review.reviewee_id == provider.provider_id).one()
@@ -56,7 +53,7 @@ class MatchingService:
             if distance is not None and distance > float(provider.service_radius_km):
                 continue
             components = {
-                "rating": rating / 5,
+                "rating": rating / 5 if count else 0.5,
                 "proximity": 0.5 if distance is None else max(0, 1 - distance / max(float(provider.service_radius_km), 1)),
                 "response": 0.5 if provider.response_time_minutes is None else max(0, min(1, 1 - provider.response_time_minutes / 240)),
                 "price": 0.5 if provider.hourly_rate is None or not request.budget_max else max(0, 1 - float(provider.hourly_rate) / float(request.budget_max)),
@@ -65,6 +62,7 @@ class MatchingService:
             total = sum(components[k] * WEIGHTS[k] for k in WEIGHTS)
             results.append((total, provider, user, rating, count, distance, components))
         results.sort(key=lambda row: row[0], reverse=True)
+        price_baseline = [provider.provider_id for provider in price_only([row[1] for row in results])[:20]]
         response = []
         for rank, (total, provider, user, rating, count, distance, components) in enumerate(results[:20], 1):
             existing = db.query(ProviderScore).filter_by(request_id=request.request_id, provider_id=provider.provider_id).first()
