@@ -1,17 +1,98 @@
-from fastapi import APIRouter, Depends
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.dependencies import require_role
-from app.models.provider import Provider
-from app.models.service_request import RequestStatus, ServiceRequest
+from app.models.service_request import RequestStatus, UrgencyLevel
 from app.models.user import User
+from app.services import provider_dashboard_service, provider_jobs_service
 
 router = APIRouter(prefix='/providers', tags=['Provider Jobs'])
 
+QuotationFilter = Literal['submitted', 'accepted', 'rejected', 'withdrawn', 'cancelled']
+
+
 @router.get('/jobs')
-def open_jobs(db: Session = Depends(get_db), user: User = Depends(require_role('provider'))):
-    provider = db.get(Provider, user.user_id)
-    if not provider: return []
-    category_ids = {category.category_id for category in provider.service_categories}
-    rows = db.query(ServiceRequest).filter(ServiceRequest.status == RequestStatus.OPEN).all()
-    return [{'id': row.request_id, 'title': row.title, 'description': row.description, 'address': row.address, 'urgency': row.urgency.value, 'categoryId': row.category_id, 'createdAt': row.created_at} for row in rows if row.category_id in category_ids]
+def open_jobs(
+    category_id: int | None = Query(default=None, alias='categoryId', ge=1),
+    urgency: UrgencyLevel | None = Query(default=None),
+    max_distance_km: float | None = Query(default=None, alias='maxDistanceKm', gt=0, le=1000),
+    within_service_radius: bool = Query(default=False, alias='withinServiceRadius'),
+    include_uncategorized: bool = Query(default=False, alias='includeUncategorized'),
+    sort: Literal['newest', 'urgency', 'nearest'] = Query(default='newest'),
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_jobs_service.list_jobs(
+        db,
+        user,
+        category_id=category_id,
+        urgency=urgency,
+        max_distance_km=max_distance_km,
+        within_service_radius=within_service_radius,
+        include_uncategorized=include_uncategorized,
+        sort=sort,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get('/jobs/{request_id}')
+def job_detail(
+    request_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_jobs_service.get_job(db, user, request_id)
+
+
+@router.get('/dashboard')
+def dashboard(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_dashboard_service.dashboard(db, user)
+
+
+@router.get('/my-jobs')
+def my_jobs(
+    status: RequestStatus | None = Query(default=None),
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_dashboard_service.list_my_jobs(db, user, status, limit, offset)
+
+
+@router.get('/my-quotations')
+def my_quotations(
+    status: QuotationFilter | None = Query(default=None),
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_dashboard_service.list_my_quotations(db, user, status, limit, offset)
+
+
+@router.post('/jobs/{request_id}/start')
+def start_job(
+    request_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_dashboard_service.start_job(db, user, request_id)
+
+
+@router.post('/jobs/{request_id}/complete')
+def complete_job(
+    request_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('provider')),
+):
+    return provider_dashboard_service.complete_job(db, user, request_id)
