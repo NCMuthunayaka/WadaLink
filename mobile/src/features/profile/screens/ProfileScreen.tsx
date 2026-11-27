@@ -1,84 +1,75 @@
-import React, { useState } from 'react';
-import Input from '@/components/ui/Input';
-import { http } from '@/services/api/client';
-import { Alert, StyleSheet, View } from 'react-native';
+﻿import React, { useEffect, useState } from 'react';
+import CategoryProposalForm from '../components/CategoryProposalForm';
+import { View } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import Avatar from '@/components/ui/Avatar';
-import Button from '@/components/ui/Button';
+import FeaturePage, { Notice, s } from '@/components/common/FeaturePage';
 import Card from '@/components/ui/Card';
 import Text from '@/components/ui/Text';
-import { colors, spacing } from '@/constants/theme';
-import type { RootStackParamList } from '@/navigation/types';
+import Input from '@/components/ui/Input';
+import Avatar from '@/components/ui/Avatar';
+import Button from '@/components/ui/Button';
+import { useRemote } from '@/hooks/useRemote';
+import { http } from '@/services/api/client';
+import { toApiError } from '@/services/api/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logout, selectUser } from '@/store/sessionSlice';
-import type { Role } from '@/types/user';
-
-const ROLE_LABELS: Record<Role, string> = {
-  customer: 'Customer',
-  provider: 'Service Provider',
-  admin: 'Admin',
-};
-
+import { logout, selectUser, restoreSession } from '@/store/sessionSlice';
+import type { RootStackParamList } from '@/navigation/types';
+import { colors } from '@/constants/theme';
+interface Profile {
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    businessName?: string;
+    bio?: string;
+    experienceYears?: number;
+    hourlyRate?: number;
+    serviceRadiusKm?: number;
+    approvalStatus?: string;
+}
+interface Category {
+    id: string;
+    name: string;
+}
 export default function ProfileScreen() {
-  const dispatch = useAppDispatch();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const user = useAppSelector(selectUser);
-  const [proposal, setProposal] = useState('');
-  const [proposalStatus, setProposalStatus] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const submitProposal = async () => {
-    setSubmitting(true);
-    try {
-      await http.post('/admin/ai/category-proposals', { name: proposal.trim() });
-      setProposal('');
-      setProposalStatus('Proposal submitted for admin review.');
-    } catch {
-      setProposalStatus('Could not submit. Check for an existing category or try again.');
-    } finally { setSubmitting(false); }
-  };
-
-  const confirmSignOut = () =>
-    Alert.alert('Sign out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => dispatch(logout()) },
-    ]);
-
-  if (!user) return null;
-
-  return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
-        <Avatar name={user.name} size={72} />
-        <Text variant="headlineSm" style={styles.name}>
-          {user.name}
-        </Text>
-        <Text variant="bodyMd" color={colors.textSecondary}>
-          {user.email}
-        </Text>
-        <View style={styles.roleBadge}>
-          <Text variant="labelMd" color={colors.secondary} style={styles.role}>
-          {ROLE_LABELS[user.role]}
-          </Text>
-        </View>
-      </Card>
-
-      {user.role === 'provider' ? <Card>
-        <Input label="Propose a service category" value={proposal} onChangeText={setProposal} />
-        <Button label={submitting ? 'Submitting…' : 'Submit proposal'} disabled={submitting || proposal.trim().length < 2} onPress={() => void submitProposal()} />
-        {proposalStatus ? <Text>{proposalStatus}</Text> : null}
-      </Card> : null}
-      <Button label="Sign out" variant="outline" size="lg" fullWidth icon="logout" onPress={confirmSignOut} />
-      {__DEV__ ? (
-        <Button label="Open UI kit (dev)" variant="ghost" fullWidth onPress={() => navigation.navigate('UIKit')} />
-      ) : null}
-    </View>
-  );
+    const user = useAppSelector(selectUser);
+    const provider = user?.role === 'provider';
+    const r = useRemote<Profile>('/users/me');
+    const categories = useRemote<Category[]>('/requests/categories');
+    const [selected, setSelected] = useState<string[]>([]);
+    const [draft, setForm] = useState<{
+        name: string;
+        phone: string;
+        address: string;
+        business: string;
+        bio: string;
+        experience: string;
+        rate: string;
+        radius: string;
+    }>();
+    const p = r.data;
+    const form = draft ?? { name: p?.name ?? '', phone: p?.phone ?? '', address: p?.address ?? '', business: p?.businessName ?? '', bio: p?.bio ?? '', experience: String(p?.experienceYears ?? 0), rate: String(p?.hourlyRate ?? 0), radius: String(p?.serviceRadiusKm ?? 10) };
+    const [message, setMessage] = useState('');
+    const [busy, setBusy] = useState(false);
+    const dispatch = useAppDispatch();
+    const nav = useNavigation<NavigationProp<RootStackParamList>>();
+    useEffect(() => { if (provider)
+        void http.get<Category[]>('/users/me/provider/categories').then(x => setSelected(x.data.map(c => String(c.id)))).catch(e => setMessage(toApiError(e).message)); }, [provider]);
+    async function save() { setBusy(true); setMessage(''); try {
+        await http.patch(provider ? '/users/me/provider' : '/users/me', { full_name: form.name, phone: form.phone, ...(provider ? { business_name: form.business, bio: form.bio, experience_years: Number(form.experience), hourly_rate: Number(form.rate), service_radius_km: Number(form.radius) } : { address: form.address }) });
+        if (provider)
+            await http.put('/users/me/provider/categories', { categoryIds: selected.map(Number) });
+        setMessage('Profile saved.');
+        setForm(undefined);
+        await r.reload();
+        void dispatch(restoreSession());
+    }
+    catch (e) {
+        setMessage(toApiError(e).message);
+    }
+    finally {
+        setBusy(false);
+    } }
+    return <FeaturePage title="Your profile" refresh={() => void r.reload()} refreshing={r.loading}>{r.error && <Notice text={r.error} retry={() => void r.reload()}/>}<Card style={s.hero}><Avatar name={r.data?.name ?? user?.name ?? ''} size={72}/><Text variant="headlineMd" color={colors.textInverse}>{r.data?.name ?? user?.name}</Text><Text color={colors.textInverse}>{user?.email}</Text><Text color={colors.textInverse}>{provider ? `Provider approval: ${r.data?.approvalStatus ?? 'Loading'}` : 'Customer account'}</Text></Card><View style={s.row}><Button size="lg" variant="secondary" label="Notifications" onPress={() => nav.navigate('Notifications')}/><Button size="lg" variant="outline" label="Equipment" onPress={() => nav.navigate('EquipmentCatalog')}/><Button size="lg" variant="outline" label="Rental history" onPress={() => nav.navigate('Reservations')}/></View>{r.data && <Card style={s.card}><Text variant="headlineSm">Account details</Text>{(['name', 'phone', ...(provider ? ['business', 'bio', 'experience', 'rate', 'radius'] : ['address'])] as (keyof typeof form)[]).map(key => <Input key={key} label={({ name: 'Full name', phone: 'Phone', business: 'Business name', bio: 'About your services', experience: 'Years of experience', rate: 'Hourly rate', radius: 'Service radius (km)', address: 'Address' })[key]} value={form[key]} multiline={key === 'bio'} onChangeText={value => setForm({ ...form, [key]: value })}/>)}{provider && <><Text variant="headlineSm">Service categories</Text><Text>Choose the services you offer to see relevant jobs.</Text>{categories.error && <Notice text={categories.error} retry={() => void categories.reload()}/>}<View style={s.row}>{categories.data?.map(c => <Button key={c.id} size="lg" label={`${selected.includes(String(c.id)) ? 'Selected: ' : ''}${c.name}`} variant={selected.includes(String(c.id)) ? 'secondary' : 'outline'} onPress={() => setSelected(selected.includes(String(c.id)) ? selected.filter(x => x !== String(c.id)) : [...selected, String(c.id)])}/>)}</View></>}<Button size="lg" label="Save profile" loading={busy} disabled={form.name.trim().length < 2} onPress={() => void save()}/></Card>}{provider && <CategoryProposalForm/>}{message && <Notice text={message}/>}<Button size="lg" variant="outline" label="Sign out" onPress={() => void dispatch(logout())}/></FeaturePage>;
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: spacing.base, paddingTop: spacing.xxxl, gap: spacing.md, backgroundColor: colors.bg },
-  card: { alignItems: 'center', gap: spacing.xs },
-  name: { marginTop: spacing.sm },
-  role: { marginTop: spacing.xs },
-  roleBadge: { marginTop: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.secondaryContainer },
-});
