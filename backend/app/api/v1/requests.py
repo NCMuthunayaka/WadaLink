@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import require_role
 from app.models.service_category import ServiceCategory
 from app.models.service_request import RequestStatus, ServiceRequest, UrgencyLevel
-from app.schemas.request_api import RequestCreate, request_response
+from app.schemas.request_api import RequestCancel, RequestCreate, RequestUpdate, request_response
+from app.services import request_service
 from app.services.classification_service import ClassificationService
 from app.models.user import User
 
@@ -38,6 +39,8 @@ def create_request(
         address=payload.address,
         latitude=payload.latitude,
         longitude=payload.longitude,
+        budget_min=payload.budgetMin,
+        budget_max=payload.budgetMax,
         status=RequestStatus.OPEN,
     )
     db.add(request)
@@ -53,8 +56,14 @@ def create_request(
 
 
 @router.get('')
-def own_requests(db: Session = Depends(get_db), user: User = Depends(require_role('customer'))):
-    return [request_response(row) for row in db.query(ServiceRequest).filter(ServiceRequest.customer_id == user.user_id).all()]
+def own_requests(
+    status: RequestStatus | None = Query(default=None, description="Filter by request status"),
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role('customer')),
+):
+    return request_service.list_own(db, user, status, limit, offset)
 
 
 @router.get("/{request_id}")
@@ -66,22 +75,10 @@ def get_request(request_id: int, db: Session = Depends(get_db), user: User = Dep
 
 
 @router.patch('/{request_id}')
-def update_request(request_id: int, payload: RequestCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role('customer'))):
-    request = db.get(ServiceRequest, request_id)
-    if request is None or request.customer_id != current_user.user_id:
-        raise HTTPException(status_code=404, detail='Request not found')
-    if request.status != RequestStatus.OPEN:
-        raise HTTPException(status_code=409, detail='Only open requests may be edited')
-    category = db.get(ServiceCategory, payload.categoryId) if payload.categoryId else None
-    if payload.categoryId is not None and (category is None or not category.is_active):
-        raise HTTPException(status_code=400, detail='Invalid category')
-    for field in ('title', 'description', 'address', 'latitude', 'longitude'):
-        setattr(request, field, getattr(payload, field))
-    request.category_id = payload.categoryId
-    request.urgency = UrgencyLevel(payload.urgency)
-    from app.models.classification_log import ClassificationLog, ClassificationStatus
-    db.add(ClassificationLog(request=request, category=category, predicted_urgency=request.urgency, model_name='manual', model_version='manual', layer='user', confidence_score=1 if category else 0, status=ClassificationStatus.SUCCESS if category else ClassificationStatus.FALLBACK, output_json={'safetyTips': []}))
-    db.commit()
-    db.refresh(request)
-    return request_response(request)
+def update_request(request_id: int, payload: RequestUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role('customer'))):
+    return request_service.update_request(db, current_user, request_id, payload)
 
+
+@router.post('/{request_id}/cancel')
+def cancel_request(request_id: int, payload: RequestCancel | None = None, db: Session = Depends(get_db), current_user: User = Depends(require_role('customer'))):
+    return request_service.cancel_request(db, current_user, request_id, payload.reason if payload else None)
