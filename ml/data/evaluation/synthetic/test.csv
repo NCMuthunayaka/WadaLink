@@ -1,0 +1,13 @@
+text,category,provenance,scenario_id
+Our shower drain is blocked and dirty water pools around our feet.,plumbing,synthetic_scenario,plumbing-2
+Please replace a cracked bathroom washbasin and reconnect its water pipes.,plumbing,synthetic_scenario,plumbing-3
+A leaking faucet in the laundry room needs a new washer.,plumbing,synthetic_scenario,plumbing-4
+The outdoor water supply pipe burst overnight and needs repair.,plumbing,synthetic_scenario,plumbing-5
+A wall power outlet sparks when I connect the kettle.,electrical,synthetic_scenario,electrical-2
+The lights flicker throughout the house even with new bulbs.,electrical,synthetic_scenario,electrical-3
+I need an electrician to install a new ceiling light and switch.,electrical,synthetic_scenario,electrical-4
+The fuse box smells burnt and one circuit has no power.,electrical,synthetic_scenario,electrical-5
+The air conditioning unit leaks water onto the wall while cooling.,hvac,synthetic_scenario,hvac-2
+The ventilation fan in our air conditioning system makes a grinding noise.,hvac,synthetic_scenario,hvac-3
+Our AC refrigerant line is frosted and airflow is weak.,hvac,synthetic_scenario,hvac-4
+The thermostat does not start the air conditioner despite the room being hot.,hvac,synthetic_scenario,hvac-5

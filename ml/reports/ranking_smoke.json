@@ -1,0 +1,82 @@
+{
+  "evidence_type": "synthetic_policy_scenarios",
+  "limitations": "Preference labels are authored, not observed customer choices. These scenarios do not establish weighted-ranking superiority.",
+  "scenarios": [
+    {
+      "scenario": "budget_priority",
+      "weighted": {
+        "ndcg@5": 1.0,
+        "ndcg@10": 1.0,
+        "mrr": 1.0,
+        "diversity@10": 0.3333333333333333
+      },
+      "price_only": {
+        "ndcg@5": 1.0,
+        "ndcg@10": 1.0,
+        "mrr": 1.0,
+        "diversity@10": 0.3333333333333333
+      },
+      "providers": [
+        {
+          "provider_id": 2,
+          "relevance": 3,
+          "score": 0.5499999999999999,
+          "price": 10.0,
+          "category": "Plumbing"
+        },
+        {
+          "provider_id": 3,
+          "relevance": 1,
+          "score": 0.5275,
+          "price": 40.0,
+          "category": "Plumbing"
+        },
+        {
+          "provider_id": 4,
+          "relevance": 0,
+          "score": 0.4775,
+          "price": 90.0,
+          "category": "Plumbing"
+        }
+      ]
+    },
+    {
+      "scenario": "experience_priority",
+      "weighted": {
+        "ndcg@5": 0.5413402936435214,
+        "ndcg@10": 0.5413402936435214,
+        "mrr": 0.5,
+        "diversity@10": 0.3333333333333333
+      },
+      "price_only": {
+        "ndcg@5": 0.5413402936435214,
+        "ndcg@10": 0.5413402936435214,
+        "mrr": 0.5,
+        "diversity@10": 0.3333333333333333
+      },
+      "providers": [
+        {
+          "provider_id": 2,
+          "relevance": 0,
+          "score": 0.5499999999999999,
+          "price": 10.0,
+          "category": "Plumbing"
+        },
+        {
+          "provider_id": 3,
+          "relevance": 1,
+          "score": 0.5275,
+          "price": 40.0,
+          "category": "Plumbing"
+        },
+        {
+          "provider_id": 4,
+          "relevance": 3,
+          "score": 0.4775,
+          "price": 90.0,
+          "category": "Plumbing"
+        }
+      ]
+    }
+  ]
+}
