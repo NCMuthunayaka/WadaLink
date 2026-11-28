@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { Pressable, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import FeaturePage, { Notice, s } from '@/components/common/FeaturePage';
 import Card from '@/components/ui/Card';
 import Text from '@/components/ui/Text';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { colors } from '@/constants/theme';
 import { http } from '@/services/api/client';
 import { toApiError } from '@/services/api/helpers';
 import type { RootStackParamList } from '@/navigation/types';
@@ -61,6 +63,13 @@ export default function EquipmentFormScreen({
   const [loaded, setLoaded] = useState(!id);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    { title: 'Basics', keys: ['name', 'category', 'description', 'image_url'] as (keyof EquipmentFormValues)[], hint: 'Help renters understand what this item is.' },
+    { title: 'Pricing', keys: ['price_per_day', 'deposit', 'delivery_fee', 'delivery_radius'] as (keyof EquipmentFormValues)[], hint: 'Set a clear price and delivery range.' },
+    { title: 'Handover', keys: ['tags', 'pickup_location', 'return_location'] as (keyof EquipmentFormValues)[], hint: 'Make pickup and return easy to understand.' },
+  ];
 
   useEffect(() => {
     if (!id) return;
@@ -119,10 +128,15 @@ export default function EquipmentFormScreen({
 
   return (
     <FeaturePage title={id ? 'Edit equipment' : 'List your equipment'}>
-      <Text>Add accurate specifications and an actual photo so renters can choose confidently.</Text>
+      <Text>Add the important details in three short steps.</Text>
+      <View style={s.stepper} accessibilityLabel={`Step ${step + 1} of ${steps.length}`}>
+        {steps.map((item, index) => <Pressable key={item.title} onPress={() => index <= step && setStep(index)} style={s.stepItem} accessibilityRole="button"><View style={[s.stepDot, index <= step && s.stepDotActive]}><Text variant="labelSm" color={index <= step ? colors.textInverse : colors.textMuted}>{index + 1}</Text></View><Text variant="labelSm" color={index === step ? colors.textPrimary : colors.textMuted}>{item.title}</Text></Pressable>)}
+      </View>
       {!!form.image_url && <EquipmentPhoto key={form.image_url} url={form.image_url} name={form.name || 'Equipment photo preview'} />}
       <Card style={s.card}>
-        {(Object.keys(form) as (keyof EquipmentFormValues)[]).map((key) => (
+        <Text variant="headlineSm">{steps[step].title}</Text>
+        <Text variant="bodySm" color={colors.textMuted}>{steps[step].hint}</Text>
+        {steps[step].keys.map((key) => (
           <Input
             key={key}
             label={LABELS[key]}
@@ -131,7 +145,8 @@ export default function EquipmentFormScreen({
             onChangeText={(value) => setForm((current) => ({ ...current, [key]: value }))}
           />
         ))}
-        <Button
+        {step > 0 ? <Button label="Back" variant="ghost" onPress={() => setStep((value) => value - 1)} /> : null}
+        {step < steps.length - 1 ? <Button label="Continue" size="lg" onPress={() => setStep((value) => value + 1)} /> : <Button
           size="lg"
           label="Save listing"
           loading={busy}
@@ -147,7 +162,7 @@ export default function EquipmentFormScreen({
             (!!form.image_url && !form.image_url.startsWith('https://'))
           }
           onPress={() => void save()}
-        />
+        />}
       </Card>
       {!!message && <Notice text={message} />}
     </FeaturePage>

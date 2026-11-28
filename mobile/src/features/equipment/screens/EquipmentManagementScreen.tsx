@@ -1,10 +1,11 @@
 import React from 'react';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import {
   View,
   FlatList,
+  ImageBackground,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -23,8 +24,11 @@ import EquipmentCard from '../components/EquipmentCard';
 import SmartLockboxStrip from '../components/SmartLockboxStrip';
 import Button from '../../../components/ui/Button';
 import type { Equipment, FilterTab } from '../../../types/equipment';
+import type { RootStackParamList } from '@/navigation/types';
 
 export default function EquipmentManagementScreen() {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [feedback, setFeedback] = React.useState('');
     const dispatch = useAppDispatch();
   const {
     items: equipment,
@@ -42,20 +46,20 @@ export default function EquipmentManagementScreen() {
   };
 
   const handleManageRental = (id: string) => {
-    Alert.alert('Manage Rental', `Opening rental management for item ${id}`);
+    navigation.navigate('Reservations');
   };
 
   const handleViewContract = (id: string) => {
-    Alert.alert('View Contract', `Opening contract for item ${id}`);
+    navigation.navigate('EquipmentDetail', { equipmentId: id });
   };
 
   const handleEditListing = (id: string) => {
-    Alert.alert('Edit Listing', `Editing listing for item ${id}`);
+    navigation.navigate('EquipmentForm', { equipmentId: id });
   };
 
 
   const handleBookings = (id: string) => {
-    Alert.alert('Bookings', `Viewing bookings for item ${id}`);
+    navigation.navigate('Reservations');
   };
 
     const changeStatus = async (
@@ -66,9 +70,9 @@ export default function EquipmentManagementScreen() {
   ) => {
     try {
       await updateStatus({ id, status: next }).unwrap();
-      Alert.alert(successTitle, successMessage);
+      setFeedback(`${successTitle}: ${successMessage}`);
     } catch {
-      Alert.alert('Something went wrong', 'The change could not be saved. Please try again.');
+      setFeedback('The change could not be saved. Please try again.');
     }
   };
 
@@ -79,7 +83,7 @@ export default function EquipmentManagementScreen() {
     changeStatus(id, 'available', 'Checked In ✅', 'Equipment marked as available.');
 
   const handleAddEquipment = () => {
-    Alert.alert('Add Equipment', 'Opening equipment creation form…');
+    navigation.navigate('EquipmentForm');
   };
 
   const renderItem = ({ item }: { item: Equipment }) => (
@@ -96,6 +100,7 @@ export default function EquipmentManagementScreen() {
 
   const ListHeader = () => (
     <>
+      {feedback ? <Text style={styles.feedback}>{feedback}</Text> : null}
       {/* ── Profile Bar ─────────────────────────── */}
       <View style={styles.profileBar}>
         <View style={styles.profileLeft}>
@@ -109,6 +114,19 @@ export default function EquipmentManagementScreen() {
           <Text style={styles.verifiedText}>Verified Lender</Text>
         </View>
       </View>
+
+      <ImageBackground
+        source={require('../../../../assets/rental-equipment.png')}
+        resizeMode="cover"
+        imageStyle={styles.fleetImage}
+        style={styles.fleetHero}
+        accessibilityLabel="Rental equipment including a ladder, drill, pressure washer and safety helmet"
+      >
+        <View style={styles.fleetHeroOverlay}>
+          <Text style={styles.fleetHeroTitle}>Tools for the job</Text>
+          <Text style={styles.fleetHeroText}>Keep every rental ready, visible and easy to manage.</Text>
+        </View>
+      </ImageBackground>
 
       {/* ── Stats ───────────────────────────────── */}
       <StatsRow stats={stats} />
@@ -141,7 +159,7 @@ export default function EquipmentManagementScreen() {
     <SmartLockboxStrip
       lockboxId="Smart Lockbox #04 (Downtown...)"
       batteryPct={94}
-      onViewCode={() => Alert.alert('Lockbox Code', '🔒 Code: 4829\nValid until 5 PM')}
+      onViewCode={() => setFeedback('Lockbox code is available in the secure handover flow.')}
     />
   );
 
@@ -195,6 +213,14 @@ export default function EquipmentManagementScreen() {
 }
 
 const styles = StyleSheet.create({
+  feedback: {
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryLight,
+    color: colors.primary,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -265,6 +291,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingBottom: spacing.md,
   },
+  fleetHero: {
+    height: 164,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.md,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    backgroundColor: colors.dark,
+  },
+  fleetImage: { borderRadius: radius.xl },
+  fleetHeroOverlay: { padding: spacing.lg, width: '68%', backgroundColor: 'rgba(15,23,42,0.68)', borderTopRightRadius: radius.xl },
+  fleetHeroTitle: { color: colors.textInverse, fontSize: fontSize.xl, fontWeight: fontWeight.bold, marginBottom: spacing.xs },
+  fleetHeroText: { color: colors.borderStrong, fontSize: fontSize.sm, lineHeight: 18 },
   profileLeft: {
     flexDirection: 'row',
     alignItems: 'center',

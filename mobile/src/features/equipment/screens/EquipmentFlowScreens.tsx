@@ -45,10 +45,11 @@ export function EquipmentPhoto({ url, name }: { url?: string; name: string }) {
       onError={() => setFailed(true)}
     />
   ) : (
-    <View style={[s.image, { justifyContent: 'center', alignItems: 'center', gap: 12 }]}>
-      <Icon name="handyman" size={48} color={colors.secondary} />
-      <Text>{name}</Text>
-      <Text color={colors.textMuted}>No equipment photo available</Text>
+    <View style={[s.image, { overflow: 'hidden' }]}>
+      <Image source={require('../../../../assets/rental-equipment.png')} accessibilityLabel={`${name} equipment preview`} style={s.image} resizeMode="cover" />
+      <View style={{ position: 'absolute', left: 12, bottom: 12, backgroundColor: 'rgba(15,23,42,0.72)', paddingHorizontal: 10, paddingVertical: 7, borderRadius: 10 }}>
+        <Text variant="labelMd" color={colors.textInverse}>Equipment preview</Text>
+      </View>
     </View>
   );
 }
@@ -152,6 +153,12 @@ export function EquipmentDetailScreen({
 
   const item = r.data;
   const rentalDays = dates ? Math.ceil((Date.parse(end) - Date.parse(start)) / 86400000) : 0;
+  const dateValue = (offset: number) => {
+    const value = new Date();
+    value.setHours(0, 0, 0, 0);
+    value.setDate(value.getDate() + offset);
+    return value.toISOString().slice(0, 10);
+  };
 
   return (
     <FeaturePage title="Equipment details" refresh={() => void r.reload()} refreshing={r.loading}>
@@ -174,8 +181,11 @@ export function EquipmentDetailScreen({
           {customer && (
             <Card style={s.card}>
               <Text variant="headlineSm">Reserve your dates</Text>
-              <Input label="Pickup date (YYYY-MM-DD)" value={start} onChangeText={setStart} />
-              <Input label="Return date (YYYY-MM-DD)" value={end} onChangeText={setEnd} />
+              <Text variant="bodySm" color={colors.textSecondary}>Choose a pickup and return day.</Text>
+              <Text variant="labelMd">Pickup date</Text>
+              <View style={s.row}>{[0, 1, 2].map((offset) => <Button key={offset} size="sm" variant={start === dateValue(offset) ? 'primary' : 'outline'} label={offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : 'In 2 days'} onPress={() => setStart(dateValue(offset))} />)}</View>
+              <Text variant="labelMd">Return date</Text>
+              <View style={s.row}>{[1, 2, 3, 7].map((offset) => <Button key={offset} size="sm" variant={end === dateValue(offset) ? 'primary' : 'outline'} label={offset === 1 ? 'Tomorrow' : offset === 7 ? 'Next week' : `In ${offset} days`} onPress={() => setEnd(dateValue(offset))} />)}</View>
               {!!(start || end) && !dates && (
                 <Text color={colors.danger}>Choose a future pickup date and a later return date.</Text>
               )}

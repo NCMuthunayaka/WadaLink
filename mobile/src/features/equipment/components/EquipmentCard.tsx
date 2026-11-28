@@ -28,9 +28,8 @@ interface EquipmentCardProps {
   onCheckIn?: (id: string) => void;
 }
 
-// Fallback placeholder image (data URI for a grey box)
-const PLACEHOLDER =
-  'https://via.placeholder.com/80x80/E5E7EB/9CA3AF?text=IMG';
+// A purposeful local fallback keeps equipment cards useful when a listing has no photo.
+const PLACEHOLDER = require('../../../../assets/rental-equipment.png');
 
 export default function EquipmentCard({
   item,
@@ -51,7 +50,7 @@ export default function EquipmentCard({
         {/* Equipment image */}
         <View style={styles.imageWrapper}>
           <Image
-            source={{ uri: imageUri }}
+            source={typeof imageUri === 'string' ? { uri: imageUri } : imageUri}
             style={styles.image}
             resizeMode="cover"
           />
