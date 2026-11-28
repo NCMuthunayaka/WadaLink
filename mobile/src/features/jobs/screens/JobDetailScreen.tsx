@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import FeaturePage, { Notice, s } from '@/components/common/FeaturePage';
 import Card from '@/components/ui/Card';
 import Text from '@/components/ui/Text';
 import Button from '@/components/ui/Button';
-import { colors } from '@/constants/theme';
+import Icon from '@/components/ui/Icon';
+import { colors, radius, spacing } from '@/constants/theme';
 import { useRemote } from '@/hooks/useRemote';
 import { http } from '@/services/api/client';
 import { toApiError } from '@/services/api/helpers';
@@ -12,31 +14,14 @@ import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/sessionSlice';
 import type { RootStackParamList } from '@/navigation/types';
 import type { Job } from './JobsScreen';
+
+const flow = ['open', 'assigned', 'in_progress', 'completed'];
+const label: Record<string, string> = { open: 'Request sent', assigned: 'Provider assigned', in_progress: 'Work in progress', completed: 'Completed' };
 export default function JobDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'JobDetail'>) {
-    const id = route.params.requestId;
-    const provider = useAppSelector(selectUser)?.role === 'provider';
-    const r = useRemote<Job>(provider ? `/providers/jobs/${id}` : `/requests/${id}`);
-    const [busy, setBusy] = useState(false);
-    const [message, setMessage] = useState('');
-    async function act(action: string) { setBusy(true); try {
-        await http.post(provider ? `/providers/jobs/${id}/${action}` : `/requests/${id}/${action}`);
-        await r.reload();
-        setMessage('Job updated.');
-    }
-    catch (e) {
-        setMessage(toApiError(e).message);
-    }
-    finally {
-        setBusy(false);
-    } }
-    const j = r.data;
-    return <FeaturePage title="Job details" refresh={() => void r.reload()} refreshing={r.loading}>{!!r.error && <Notice text={r.error} retry={() => void r.reload()}/>} {j && <><Card style={s.hero}><Text color={colors.textInverse}>{j.status.replaceAll('_', ' ')} · {j.urgency}</Text><Text color={colors.textInverse} variant="headlineMd">{j.title}</Text></Card><Card style={s.card}><Text variant="headlineSm">About this request</Text><Text>{j.description}</Text><Text>Location: {j.address}</Text>{j.budgetMax != null && <Text>Budget up to {j.budgetMax}</Text>}</Card>
- {!provider && j.status === 'open' && <><Button size="lg" label="Find matching providers" onPress={() => navigation.navigate('MatchingProviders', { requestId: id })}/><Button size="lg" variant="outline" label="Compare quotations" onPress={() => navigation.navigate('QuotationComparison', { requestId: id })}/></>}
- {provider && j.canQuote && <Button size="lg" label="Prepare quotation" onPress={() => navigation.navigate('QuotationSubmission', { requestId: id })}/>}
- {provider && j.status === 'assigned' && <Button size="lg" loading={busy} label="Start work" onPress={() => void act('start')}/>}
- {provider && j.status === 'in_progress' && <Button size="lg" loading={busy} label="Mark completed" onPress={() => void act('complete')}/>}
- {['assigned', 'in_progress', 'completed'].includes(j.status) && <Button size="lg" variant="secondary" label="Message about this job" onPress={() => navigation.navigate('Chat', { requestId: id })}/>}
- {j.status === 'completed' && <Button size="lg" variant="outline" label="Reviews and feedback" onPress={() => navigation.navigate('Reviews', { requestId: id })}/>}
- {!provider && j.status === 'open' && <Button size="lg" variant="danger" loading={busy} label="Cancel request" onPress={() => void act('cancel')}/>}
- </>}{!!message && <Notice text={message}/>}</FeaturePage>;
+  const id = route.params.requestId; const provider = useAppSelector(selectUser)?.role === 'provider'; const r = useRemote<Job>(provider ? `/providers/jobs/${id}` : `/requests/${id}`); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(''); const j = r.data;
+  async function act(action: string) { setBusy(true); try { await http.post(provider ? `/providers/jobs/${id}/${action}` : `/requests/${id}/${action}`); await r.reload(); setMessage('Job updated.'); } catch (e) { setMessage(toApiError(e).message); } finally { setBusy(false); } }
+  const current = j ? Math.max(0, flow.indexOf(j.status)) : 0;
+  return <FeaturePage title="Job details" refresh={() => void r.reload()} refreshing={r.loading}>{!!r.error && <Notice text={r.error} retry={() => void r.reload()} />}{j && <><Card style={s.hero}><View style={styles.heroTop}><View style={styles.heroIcon}><Icon name="work" size={21} color={colors.primary} /></View><Text variant="labelMd" color={colors.borderStrong}>{j.urgency} priority</Text></View><Text color={colors.textInverse} variant="headlineMd">{j.title}</Text><Text color={colors.borderStrong}>{j.address}</Text></Card><Card style={styles.timelineCard}><Text variant="headlineSm">Where things stand</Text>{flow.map((step, index) => { const done = index <= current; const active = index === current; return <View key={step} style={styles.timelineRow}><View style={styles.timelineMarkerWrap}><View style={[styles.marker, done && styles.markerDone, active && styles.markerActive]}>{done && <Icon name="check" size={14} color={colors.textInverse} />}</View>{index < flow.length - 1 && <View style={[styles.line, index < current && styles.lineDone]} />}</View><View style={styles.timelineText}><Text variant="labelLg" color={done ? colors.textPrimary : colors.textMuted}>{label[step]}</Text>{active && <Text variant="bodySm" color={colors.textSecondary}>Current step</Text>}</View></View> })}</Card><Card style={s.card}><Text variant="headlineSm">About this request</Text><Text color={colors.textSecondary}>{j.description}</Text><View style={styles.infoRow}><Icon name="location-on" size={18} color={colors.secondary} /><Text style={styles.infoText}>{j.address}</Text></View>{j.budgetMax != null && <View style={styles.infoRow}><Icon name="payments" size={18} color={colors.secondary} /><Text style={styles.infoText}>Budget up to {j.budgetMax}</Text></View>}</Card><View style={styles.actions}>{!provider && j.status === 'open' && <><Button size="lg" label="Find matching providers" icon="search" onPress={() => navigation.navigate('MatchingProviders', { requestId: id })} /><Button size="lg" variant="outline" label="Compare quotations" icon="compare-arrows" onPress={() => navigation.navigate('QuotationComparison', { requestId: id })} /></>}{provider && j.canQuote && <Button size="lg" label="Prepare quotation" icon="request-quote" onPress={() => navigation.navigate('QuotationSubmission', { requestId: id })} />}{provider && j.status === 'assigned' && <Button size="lg" loading={busy} label="Start work" icon="play-arrow" onPress={() => void act('start')} />}{provider && j.status === 'in_progress' && <Button size="lg" loading={busy} label="Mark completed" icon="check-circle" onPress={() => void act('complete')} />}{['assigned', 'in_progress', 'completed'].includes(j.status) && <Button size="lg" variant="secondary" label="Message about this job" icon="chat-bubble-outline" onPress={() => navigation.navigate('Chat', { requestId: id })} />}{j.status === 'completed' && <Button size="lg" variant="outline" label="Reviews and feedback" icon="star-outline" onPress={() => navigation.navigate('Reviews', { requestId: id })} />}{!provider && j.status === 'open' && <Button size="lg" variant="danger" loading={busy} label="Cancel request" icon="close" onPress={() => void act('cancel')} />}</View></>}{!!message && <Notice text={message} />}</FeaturePage>;
 }
+
+const styles = StyleSheet.create({ heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, heroIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }, timelineCard: { gap: spacing.md }, timelineRow: { flexDirection: 'row', minHeight: 54 }, timelineMarkerWrap: { width: 30, alignItems: 'center' }, marker: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.surfaceContainer, alignItems: 'center', justifyContent: 'center' }, markerDone: { backgroundColor: colors.secondary }, markerActive: { borderWidth: 3, borderColor: colors.primary, backgroundColor: colors.primary }, line: { width: 2, flex: 1, backgroundColor: colors.border }, lineDone: { backgroundColor: colors.secondary }, timelineText: { flex: 1, paddingLeft: spacing.sm, paddingTop: 2 }, infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, infoText: { flex: 1, color: colors.textSecondary, lineHeight: 21 }, actions: { gap: spacing.sm }, });

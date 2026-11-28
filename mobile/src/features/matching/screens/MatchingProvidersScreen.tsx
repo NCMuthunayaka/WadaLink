@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, ImageBackground, ScrollView, StyleSheet, View } from 'react-native';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import Button from '@/components/ui/Button';
@@ -8,7 +8,7 @@ import Chip from '@/components/ui/Chip';
 import Icon from '@/components/ui/Icon';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 import Text from '@/components/ui/Text';
-import { colors, spacing } from '@/constants/theme';
+import { colors, radius, spacing } from '@/constants/theme';
 import FlowProgress from '@/features/requests/components/FlowProgress';
 import type { CustomerStackScreenProps } from '@/navigation/types';
 import { useGetMatchesQuery } from '@/services/api/requests';
@@ -64,6 +64,19 @@ export default function MatchingProvidersScreen({
           request and location
         </Text>
       </View>
+
+      <ImageBackground
+        source={require('../../../../assets/wedalink-hero.png')}
+        resizeMode="cover"
+        imageStyle={styles.matchImage}
+        style={styles.matchHero}
+        accessibilityLabel="Two trusted home-service providers ready to help"
+      >
+        <View style={styles.matchHeroOverlay}>
+          <Text variant="headlineSm" color={colors.textInverse}>People you can trust</Text>
+          <Text variant="bodySm" color={colors.borderStrong}>Compare experience, price and availability before you choose.</Text>
+        </View>
+      </ImageBackground>
 
       <Card variant="ai">
         <View style={styles.formula}>
@@ -141,6 +154,9 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   list: { padding: spacing.base, paddingBottom: spacing.xxxl },
   listHeader: { gap: spacing.base, marginBottom: spacing.base },
+  matchHero: { height: 170, borderRadius: radius.xl, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: colors.dark },
+  matchImage: { borderRadius: radius.xl },
+  matchHeroOverlay: { padding: spacing.lg, backgroundColor: 'rgba(15,23,42,0.64)' },
   formula: { flexDirection: 'row', gap: spacing.md },
   formulaText: { flex: 1, gap: 2 },
   filters: { gap: spacing.sm, paddingRight: spacing.base },
