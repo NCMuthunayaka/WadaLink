@@ -16,8 +16,8 @@ export default function PlaceholderScreen({ title, icon }: PlaceholderScreenProp
         <Icon name={icon} size={32} color={colors.secondary} />
       </View>
       <Text variant="headlineMd">{title}</Text>
-      <Text variant="bodyMd" color={colors.textMuted} style={styles.sub}>
-        Coming soon
+      <Text variant="bodyMd" color={colors.textSecondary} style={styles.sub}>
+        This space is ready for your next update. Check back after completing your current task.
       </Text>
     </View>
   );

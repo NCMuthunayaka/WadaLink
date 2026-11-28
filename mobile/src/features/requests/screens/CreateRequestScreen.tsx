@@ -132,7 +132,7 @@ export default function CreateRequestScreen({
           <View style={styles.intro}>
             <Text variant="headlineMd">What needs fixing?</Text>
             <Text variant="bodyMd" color={colors.textSecondary}>
-              Tell us what happened and we’ll help find the right professional.
+              Tell us what happened in your own words. We’ll guide you to the right help.
             </Text>
           </View>
 
@@ -266,7 +266,7 @@ export default function CreateRequestScreen({
           <FormError message={submitError} />
 
           <Button
-            label={isEditing ? 'Save & Re-analyze' : 'Analyze with AI & Find Providers'}
+            label={isEditing ? 'Save and update matches' : 'Find trusted help'}
             variant="ai"
             size="lg"
             fullWidth

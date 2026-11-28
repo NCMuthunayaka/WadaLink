@@ -47,6 +47,11 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
           </View>
         </View>
 
+        <View style={styles.trustRow}>
+          <View style={styles.trustItem}><Icon name="verified-user" size={17} color={colors.secondary} /><Text variant="labelMd" color={colors.textSecondary}>Trusted local help</Text></View>
+          <View style={styles.trustItem}><Icon name="auto-awesome" size={17} color={colors.accent} /><Text variant="labelMd" color={colors.textSecondary}>Guided step by step</Text></View>
+        </View>
+
         <Text variant="headlineLg" style={styles.title}>
           {title}
         </Text>
@@ -112,8 +117,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.94)',
+    backgroundColor: colors.surface,
   },
+  trustRow: { flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap', paddingHorizontal: spacing.xs },
+  trustItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   title: { marginTop: spacing.sm },
   subtitle: { marginTop: -spacing.sm },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },

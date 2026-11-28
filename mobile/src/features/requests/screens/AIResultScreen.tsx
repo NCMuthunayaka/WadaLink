@@ -101,7 +101,7 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
           <View style={styles.heroTag}>
             <Icon name="auto-awesome" size={16} color={colors.accentDark} />
             <Text variant="labelSm" color={colors.accentDark}>
-              {adminReviewed ? 'REVIEWED BY OUR TEAM' : manual ? 'YOUR SELECTION' : resolved ? 'AI SUGGESTION' : manualReview ? 'SAVED FOR REVIEW' : 'YOUR INPUT NEEDED'}
+              {adminReviewed ? 'REVIEWED BY OUR TEAM' : manual ? 'YOUR SELECTION' : resolved ? 'SMART MATCH' : manualReview ? 'SAVED FOR REVIEW' : 'YOUR INPUT NEEDED'}
             </Text>
           </View>
 
@@ -138,7 +138,7 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
               {manualReview ? 'We could not match your request to a listed service. It has been saved for our team to review; provider matching will start after a category is assigned.' : c.details.reason === 'Service not available yet' ? "We don't have this service yet. You can choose another category or edit your request." : 'We could not confidently identify a service. Choose a category using Not right? Change below.'}
             </Text>
           ) : null}
-          {resolved && !manual && !adminReviewed ? <Text variant="bodyMd" color={colors.textSecondary}>Based on your description. Please confirm the category before viewing providers.</Text> : null}
+              {resolved && !manual && !adminReviewed ? <Text variant="bodyMd" color={colors.textSecondary}>We used your description to suggest this. Confirm it before viewing providers.</Text> : null}
         </Card>
 
         {!resolved && !manualReview && suggestions.length > 0 ? <Card style={styles.hero}>

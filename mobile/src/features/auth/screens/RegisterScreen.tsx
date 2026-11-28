@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -93,15 +93,12 @@ export default function RegisterScreen({
         keyboardType="number-pad"
         autoComplete="tel"
       />
-      <Pressable
+      <View
         style={styles.phoneHint}
-        accessibilityRole="button"
-        accessibilityLabel="Phone number format information"
-        onPress={() => Alert.alert('Sri Lankan phone format', 'The +94 prefix is already included. Type exactly 9 digits after it and do not type the local 0. Example: 771234567.')}
       >
         <Icon name="info-outline" size={16} color={colors.secondary} />
         <Text variant="bodySm" color={colors.textMuted} style={styles.phoneHintText}>Enter 9 digits after +94. Example: 771234567</Text>
-      </Pressable>
+      </View>
       <FormInput
         control={control}
         name="password"
