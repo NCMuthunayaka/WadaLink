@@ -180,3 +180,42 @@ mobile/src/components/common/
 ```
 
 Update the shared theme or reusable component before adding a new one-off style.
+
+## Image generation and usage guide
+
+Use realistic, polished 3D-rendered scenes with natural people, practical tools, believable materials, soft daylight, and the WedaLink blue/teal/orange accent balance. The reference image for this visual language is `mobile/assets/wedalink-hero.png`. The reference guides realism, lighting, warmth, and composition; new images must not duplicate its characters or exact composition.
+
+### Generation brief
+
+```text
+Use case: photorealistic-natural
+Asset type: [screen or component]
+Primary request: [specific scenario]
+Input images: mobile/assets/wedalink-hero.png as a style reference
+Scene/backdrop: [real location]
+Subject: [people, service, or equipment]
+Style/medium: realistic polished commercial 3D render
+Composition/framing: [wide, portrait, or close crop and copy-safe space]
+Lighting/mood: soft natural daylight, trustworthy and welcoming
+Color palette: #004AC6, #006A63, #06B6D4, warm orange accents
+Constraints: no text, no logos, no watermark, distinct composition
+```
+
+### Screen mapping
+
+| Screen | Image direction | Asset |
+|---|---|---|
+| Landing | Technician helping a homeowner in a real home, wide crop with copy-safe space | `service-visit.png` |
+| Customer dashboard | Homeowner and technician connection at a home entrance | `wedalink-hero.png` |
+| Equipment management | Realistic rental tools arranged on a workbench | `rental-equipment.png` |
+| Provider matching | Trusted service professionals outside a home | Use a dedicated provider image when available |
+
+### Implementation rules
+
+- Do not reuse the same image across unrelated screens.
+- Use images only when they explain the task or build trust; avoid decorative images on dense forms.
+- Keep important copy and controls outside the image focal point.
+- Use `accessibilityLabel` for meaningful images and mark decorative images appropriately.
+- Use a purposeful crop, readable contrast overlay, and a fallback asset when remote media is unavailable.
+- Store generated assets in `mobile/assets/` with descriptive names such as `service-visit.png`.
+- Never include generated text, logos, watermarks, unsafe service behavior, or unverified claims inside an image.

@@ -22,6 +22,24 @@
 
 Audited 2026-11-27 against the current worktree. Completion is `(DONE + 0.5 x PARTIAL) / total`; CANNOT VERIFY contributes zero. The ordered checklist below is the full item list. Backend findings require registered routes and implementation evidence; frontend findings require reachable screens and API wiring; database DONE requires model plus migration/schema evidence. Passing focused tests is recorded separately and is not treated as proof of end-to-end completion.
 
+## Mobile UI usability audit — 2026-11-28
+
+The requested mobile UI audit items were added and checked against the current implementation. `[x]` means the requested UI treatment is implemented; `[~]` means the production flow is improved but still depends on backend data or a future device-level validation pass.
+
+- **[x]** Profile editing split into Account, Services, and More sections with shorter forms.
+- **[x]** Job detail uses a visual status timeline, urgency badge, location card, and grouped actions.
+- **[x]** Matching cards support provider photos with initials fallback and an expandable ranking explanation.
+- **[x]** Quotation comparison supports provider names/photos with best-value and fastest comparison highlights.
+- **[x]** Equipment listing is a three-step Basics, Pricing, and Handover flow with photo preview.
+- **[x]** Equipment details use guided date choices instead of free-text date entry.
+- **[x]** Loading screens use skeleton cards instead of a spinner-only state.
+- **[x]** Landing screen has separate customer and provider entry actions.
+- **[x]** Notifications, reservations, chat, provider jobs, and quotation submission received visual hierarchy and clearer empty/error states.
+- **[x]** Repeated remote placeholder equipment imagery was replaced with the local generated visual fallback.
+- **[~]** Provider photos and names display when the API supplies `photoUrl`, `providerName`, or `providerPhotoUrl`; existing records retain safe initials/ID fallbacks.
+- **[~]** Legacy development-only equipment screens and registration helper copy still contain alert-based helper messages; production equipment browsing/listing routes use the new in-app flows.
+- **[~]** Final accessibility and small-screen testing still requires emulator/device screenshots and touch-target verification.
+
 ## Full item list
 
 ## Audit status — 2026-11-27
