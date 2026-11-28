@@ -18,6 +18,7 @@ export interface MatchScoreBreakdown {
 export interface MatchedProvider {
   providerId: ID;
   name: string;
+  photoUrl?: string;
   businessName?: string;
   experienceYears: number;
   /** Average of the provider's reviews. */

@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: '#DDE7EE',
+    borderColor: colors.border,
     ...shadow.sm,
   },
   // AI Match Card: faint cyan tint with a 4px accent edge

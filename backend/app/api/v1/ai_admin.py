@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.core.database import get_db
 from app.core.dependencies import require_role
-from app.models.ai_review import CategoryProposal, LabeledRequest, ReviewQueueStatus
+from app.models.ai_review import CategoryProposal, LabeledRequest, ReviewQueueStatus, UnmatchedRequest
+from app.models.classification_log import ClassificationLog, ClassificationStatus
 from app.models.service_category import ServiceCategory
+from app.models.service_request import RequestStatus, ServiceRequest
 from app.models.user import User
 from app.models.admin_log import AdminLog
+from app.models.notification import Notification
 from pydantic import BaseModel, Field
+from typing import Literal
 
 
 class ReviewDecision(BaseModel):
@@ -19,6 +23,12 @@ class ReviewDecision(BaseModel):
 class ProposalCreate(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     description: str | None = None
+
+
+class UnmatchedDecision(BaseModel):
+    decision: Literal["assign", "close"]
+    categoryId: int | None = None
+
 
 router = APIRouter(prefix="/admin/ai", tags=["AI Administration"])
 
@@ -35,6 +45,115 @@ def review_stats(db: Session = Depends(get_db), _: User = Depends(require_role("
         "approvedReviews": db.query(LabeledRequest).filter(LabeledRequest.status == ReviewQueueStatus.APPROVED).count(),
         "rejectedReviews": db.query(LabeledRequest).filter(LabeledRequest.status == ReviewQueueStatus.REJECTED).count(),
         "pendingCategoryProposals": db.query(CategoryProposal).filter(CategoryProposal.status == ReviewQueueStatus.PENDING).count(),
+        "pendingUnmatchedRequests": db.query(UnmatchedRequest).filter(UnmatchedRequest.status == "pending").count(),
+    }
+
+
+@router.get("/unmatched-requests")
+def unmatched_requests(db: Session = Depends(get_db), _: User = Depends(require_role("admin"))):
+    rows = db.query(UnmatchedRequest).filter(
+        UnmatchedRequest.status == "pending"
+    ).order_by(UnmatchedRequest.created_at.asc(), UnmatchedRequest.unmatched_id.asc()).limit(100).all()
+    return [
+        {
+            "id": item.unmatched_id,
+            "requestId": item.request_id,
+            "text": item.input_text,
+            "reason": item.reason,
+            "createdAt": item.created_at,
+        }
+        for item in rows
+    ]
+
+
+@router.post("/unmatched-requests/{item_id}/review")
+def review_unmatched_request(
+    item_id: int,
+    payload: UnmatchedDecision,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_role("admin")),
+):
+    item = db.query(UnmatchedRequest).filter(
+        UnmatchedRequest.unmatched_id == item_id
+    ).with_for_update().first()
+    if item is None:
+        raise HTTPException(status_code=404, detail="Unmatched request not found")
+    if item.status != "pending":
+        raise HTTPException(status_code=409, detail="Unmatched request was already reviewed")
+
+    request = db.get(ServiceRequest, item.request_id)
+    if request is None:
+        raise HTTPException(status_code=404, detail="Service request not found")
+
+    category = None
+    if payload.decision == "assign":
+        if payload.categoryId is None:
+            raise HTTPException(status_code=422, detail="Choose an active category")
+        category = db.get(ServiceCategory, payload.categoryId)
+        if category is None or not category.is_active:
+            raise HTTPException(status_code=422, detail="Choose an active category")
+        request.category_id = category.category_id
+        db.add(ClassificationLog(
+            request_id=request.request_id,
+            category_id=category.category_id,
+            predicted_urgency=request.urgency,
+            model_name="admin-review",
+            model_version="admin-review",
+            layer="admin",
+            confidence_score=1.0,
+            input_text=item.input_text,
+            output_json={
+                "categories": [],
+                "reason": "Category assigned during admin review.",
+                "safetyTips": [],
+            },
+            status=ClassificationStatus.SUCCESS,
+        ))
+        labeled = db.query(LabeledRequest).filter(
+            LabeledRequest.request_id == request.request_id
+        ).order_by(LabeledRequest.created_at.desc()).first()
+        if labeled is None:
+            labeled = LabeledRequest(
+                request_id=request.request_id,
+                input_text=item.input_text,
+                suggested_category=category.category_name,
+                confidence=1.0,
+            )
+        labeled.suggested_category = category.category_name
+        labeled.confidence = 1.0
+        labeled.status = ReviewQueueStatus.APPROVED
+        labeled.reviewed_by = admin.user_id
+        db.add(labeled)
+        item.status = "resolved"
+        notification_title = "Service request reviewed"
+        notification_message = f'Your request is now categorized as "{category.category_name}" and can be matched with providers.'
+    else:
+        request.status = RequestStatus.CANCELLED
+        item.status = "closed"
+        notification_title = "Service request closed"
+        notification_message = "We could not match this request to a supported service, so it was closed. You can create a new request if you selected the wrong option."
+
+    item.reviewed_by = admin.user_id
+    item.reviewed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.add(Notification(
+        user_id=request.customer_id,
+        related_request_id=request.request_id,
+        event_type=f"unmatched_request_{payload.decision}",
+        title=notification_title,
+        message=notification_message,
+    ))
+    db.add(AdminLog(
+        admin_id=admin.user_id,
+        action_type=f"unmatched_request_{payload.decision}",
+        target_type="unmatched_request",
+        target_id=item.unmatched_id,
+    ))
+    db.commit()
+    return {
+        "id": item.unmatched_id,
+        "requestId": request.request_id,
+        "status": item.status,
+        "categoryId": category.category_id if category else None,
     }
 
 

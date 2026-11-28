@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   StatusBar,
   Switch,
-  Alert,
   Image,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
@@ -53,6 +52,7 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
     'Professional 320×240 IR resolution thermal imaging camera. Fully calibrated. Includes hard case, 2 batteries, and charging dock.'
   );
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [feedback, setFeedback] = useState('');
   const [images, setImages] = useState<string[]>([
     'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80',
   ]);
@@ -64,7 +64,7 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
         'Professional 320×240 IR resolution thermal imaging camera with MSX detail. Fully calibrated for electrical panel diagnostics, HVAC air leaks, and moisture boundary tracing. Includes rugged hard case, 2 batteries, and charging dock.'
       );
       setIsEnhancing(false);
-      Alert.alert('AI TradeAssist', 'Description enhanced with high-conversion technical specifications!');
+      setFeedback('Description enhanced with clearer technical details.');
     }, 600);
   };
 
@@ -80,19 +80,19 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
     ];
     if (images.length < 5) {
       setImages([...images, samplePhotos[images.length % samplePhotos.length]]);
-      Alert.alert('Photo Added', 'High-res image attached to listing.');
+      setFeedback('Photo added to your listing.');
     } else {
-      Alert.alert('Limit Reached', 'Maximum 5 photos allowed.');
+      setFeedback('You can add up to 5 photos.');
     }
   };
 
   const handleSaveDraft = () => {
-    Alert.alert('Draft Saved', 'Your equipment listing has been saved to drafts.');
+    setFeedback('Draft saved. You can finish it later.');
   };
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter an equipment title.');
+      setFeedback('Please enter an equipment title.');
       return;
     }
 
@@ -145,20 +145,8 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
 
     dispatch(addEquipment(newEquipment));
 
-    Alert.alert(
-      'Listing Published! 🎉',
-      `${title} is now active and listed in the WadaLink Equipment Marketplace.`,
-      [
-        {
-          text: 'View Fleet',
-          onPress: () => {
-            if (navigation) {
-              navigation.goBack();
-            }
-          },
-        },
-      ]
-    );
+    setFeedback(`${title} is now active in the equipment marketplace.`);
+    navigation?.goBack();
   };
 
   return (
@@ -184,6 +172,7 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
           </View>
         </View>
       </View>
+      {feedback ? <View style={styles.feedback}><Text style={styles.feedbackText}>{feedback}</Text></View> : null}
 
       {/* ── Progress Bar ───────────────────────────────────── */}
       <View style={styles.progressContainer}>
@@ -473,9 +462,11 @@ export default function AddEquipmentScreen({ navigation }: AddEquipmentScreenPro
 }
 
 const styles = StyleSheet.create({
+  feedback: { marginHorizontal: spacing.base, marginBottom: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primaryLight },
+  feedbackText: { color: colors.primary, fontSize: fontSize.sm },
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -546,7 +537,7 @@ const styles = StyleSheet.create({
   },
   progressBarTrack: {
     height: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.border,
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -597,7 +588,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#000',
+    backgroundColor: colors.dark,
     position: 'relative',
   },
   thumbnail: {
@@ -608,7 +599,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: colors.overlay,
     width: 20,
     height: 20,
     borderRadius: 10,
@@ -616,7 +607,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   removeImageText: {
-    color: '#FFF',
+    color: colors.textInverse,
     fontSize: 10,
     fontWeight: fontWeight.bold,
   },
@@ -625,9 +616,9 @@ const styles = StyleSheet.create({
     bottom: 4,
     left: 4,
     right: 4,
-    color: '#FFF',
+    color: colors.textInverse,
     fontSize: 9,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlay,
     paddingHorizontal: 4,
     borderRadius: 2,
   },
@@ -636,8 +627,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: '#C7D2FE',
-    backgroundColor: '#F5F8FF',
+    borderColor: colors.primaryLight,
+    backgroundColor: colors.surfaceLow,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -686,16 +677,16 @@ const styles = StyleSheet.create({
   categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
   },
   categoryPillActive: {
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.dark,
   },
   categoryCheck: {
-    color: '#FFF',
+    color: colors.textInverse,
     fontSize: fontSize.xs,
     fontWeight: fontWeight.bold,
   },
@@ -705,7 +696,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   categoryPillTextActive: {
-    color: '#FFF',
+    color: colors.textInverse,
     fontWeight: fontWeight.bold,
   },
   conditionsRow: {
@@ -714,7 +705,7 @@ const styles = StyleSheet.create({
   },
   conditionCard: {
     flex: 1,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.surfaceLow,
     borderWidth: 1,
     borderColor: 'transparent',
     borderRadius: radius.md,
@@ -722,7 +713,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   conditionCardActive: {
-    backgroundColor: '#EBF3FF',
+    backgroundColor: colors.primaryLight,
     borderColor: colors.primary,
   },
   conditionIcon: {
@@ -778,7 +769,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   escrowBadge: {
-    backgroundColor: '#CCFBF1',
+    backgroundColor: colors.secondaryContainer,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: radius.pill,
@@ -786,7 +777,7 @@ const styles = StyleSheet.create({
   escrowBadgeText: {
     fontSize: 10,
     fontWeight: fontWeight.bold,
-    color: '#0D9488',
+    color: colors.secondary,
   },
   pricingInputsRow: {
     flexDirection: 'row',
@@ -794,7 +785,7 @@ const styles = StyleSheet.create({
   },
   priceInputBox: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surfaceLow,
     borderRadius: radius.md,
     padding: spacing.md,
     borderWidth: 1,
@@ -853,7 +844,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceLow,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -870,7 +861,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   termSelectorPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceLow,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: radius.sm,
@@ -887,7 +878,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#EEF2FF',
+    backgroundColor: colors.primaryLight,
     borderRadius: radius.md,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
@@ -929,9 +920,9 @@ const styles = StyleSheet.create({
   },
   protectionCallout: {
     flexDirection: 'row',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: colors.successLight,
     borderWidth: 1,
-    borderColor: '#BBF7D0',
+    borderColor: colors.successLight,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.md,
@@ -941,13 +932,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: colors.successLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   protectionIcon: {
     fontSize: 16,
-    color: '#16A34A',
+    color: colors.success,
   },
   protectionTextWrap: {
     flex: 1,
@@ -955,12 +946,12 @@ const styles = StyleSheet.create({
   protectionTitle: {
     fontSize: fontSize.xs,
     fontWeight: fontWeight.bold,
-    color: '#166534',
+    color: colors.secondary,
     marginBottom: 2,
   },
   protectionDesc: {
     fontSize: 11,
-    color: '#15803D',
+    color: colors.secondary,
     lineHeight: 16,
   },
   bottomBar: {

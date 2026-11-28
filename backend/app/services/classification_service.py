@@ -16,28 +16,46 @@ class ClassificationService:
     _rate: dict[int, list[float]] = {}
 
     @classmethod
-    def classify_request(cls, db: Session, request: ServiceRequest) -> ClassificationLog:
+    def classify_request(
+        cls, db: Session, request: ServiceRequest, *, require_manual_review: bool = False
+    ) -> ClassificationLog:
         categories = [row.category_name for row in db.query(ServiceCategory).filter(ServiceCategory.is_active.is_(True)).all()]
-        cache_key = repr((request.customer_id, tuple(sorted(categories)), cls.pipeline.model_name, cls._scrub_pii(f"{request.title} {request.description}".strip()).lower()))
-        now = time.time()
-        recent = [stamp for stamp in cls._rate.get(request.customer_id, []) if now - stamp < 3600]
-        limited = len(recent) >= 60
-        if not limited:
-            recent.append(now)
-        cls._rate[request.customer_id] = recent
-        cached = cls._cache.get(cache_key)
-        if limited:
-            result = cls.pipeline.classify(None, '', categories)
+        if require_manual_review:
+            result = {
+                "category": "User Picks",
+                "confidence": 0.0,
+                "urgency": request.urgency.value,
+                "status": "fallback",
+                "layer": "user",
+                "model_name": cls.pipeline.model_name,
+                "details": {
+                    "safetyTips": [],
+                    "categories": categories,
+                    "reason": "Manual review requested because no listed category matches.",
+                },
+            }
         else:
-            result = cached[1] if cached and now - cached[0] < 300 else cls.pipeline.classify(request.title, request.description, categories)
-        cls._cache = {key: value for key, value in cls._cache.items() if now - value[0] < 300}
-        if not limited:
-            cls._cache[cache_key] = (now, result)
+            cache_key = repr((request.customer_id, tuple(sorted(categories)), cls.pipeline.model_name, cls._scrub_pii(f"{request.title} {request.description}".strip()).lower()))
+            now = time.time()
+            recent = [stamp for stamp in cls._rate.get(request.customer_id, []) if now - stamp < 3600]
+            limited = len(recent) >= 60
+            if not limited:
+                recent.append(now)
+            cls._rate[request.customer_id] = recent
+            cached = cls._cache.get(cache_key)
+            if limited:
+                result = cls.pipeline.classify(None, '', categories)
+            else:
+                result = cached[1] if cached and now - cached[0] < 300 else cls.pipeline.classify(request.title, request.description, categories)
+            cls._cache = {key: value for key, value in cls._cache.items() if now - value[0] < 300}
+            if not limited:
+                cls._cache[cache_key] = (now, result)
         category = db.query(ServiceCategory).filter(
             ServiceCategory.category_name.ilike(result["category"]),
             ServiceCategory.is_active.is_(True),
         ).first()
-        request.category_id = category.category_id if category else request.category_id
+        if not require_manual_review:
+            request.category_id = category.category_id if category else request.category_id
         request.urgency = result["urgency"]
         log = ClassificationLog(
             request=request,
@@ -61,11 +79,20 @@ class ClassificationService:
                 status=ReviewQueueStatus.PENDING,
             ))
         if result['status'] == 'fallback':
-            db.add(UnmatchedRequest(
-                request_id=request.request_id,
-                input_text=cls._scrub_pii(f"{request.title} {request.description}".strip()),
-                reason=result["details"].get("reason", "Low confidence or similarity"),
-            ))
+            unmatched = db.query(UnmatchedRequest).filter(
+                UnmatchedRequest.request_id == request.request_id,
+                UnmatchedRequest.status == "pending",
+            ).first()
+            if unmatched is None:
+                unmatched = UnmatchedRequest(
+                    request_id=request.request_id,
+                    input_text=cls._scrub_pii(f"{request.title} {request.description}".strip()),
+                    reason=result["details"].get("reason", "Low confidence or similarity"),
+                )
+            else:
+                unmatched.input_text = cls._scrub_pii(f"{request.title} {request.description}".strip())
+                unmatched.reason = result["details"].get("reason", "Low confidence or similarity")
+            db.add(unmatched)
         db.commit()
         db.refresh(log)
         return log

@@ -22,6 +22,24 @@
 
 Audited 2026-11-27 against the current worktree. Completion is `(DONE + 0.5 x PARTIAL) / total`; CANNOT VERIFY contributes zero. The ordered checklist below is the full item list. Backend findings require registered routes and implementation evidence; frontend findings require reachable screens and API wiring; database DONE requires model plus migration/schema evidence. Passing focused tests is recorded separately and is not treated as proof of end-to-end completion.
 
+## Mobile UI usability audit — 2026-11-28
+
+The requested mobile UI audit items were added and checked against the current implementation. `[x]` means the requested UI treatment is implemented; `[~]` means the production flow is improved but still depends on backend data or a future device-level validation pass.
+
+- **[x]** Profile editing split into Account, Services, and More sections with shorter forms.
+- **[x]** Job detail uses a visual status timeline, urgency badge, location card, and grouped actions.
+- **[x]** Matching cards support provider photos with initials fallback and an expandable ranking explanation.
+- **[x]** Quotation comparison supports provider names/photos with best-value and fastest comparison highlights.
+- **[x]** Equipment listing is a three-step Basics, Pricing, and Handover flow with photo preview.
+- **[x]** Equipment details use guided date choices instead of free-text date entry.
+- **[x]** Loading screens use skeleton cards instead of a spinner-only state.
+- **[x]** Landing screen has separate customer and provider entry actions.
+- **[x]** Notifications, reservations, chat, provider jobs, and quotation submission received visual hierarchy and clearer empty/error states.
+- **[x]** Repeated remote placeholder equipment imagery was replaced with the local generated visual fallback.
+- **[~]** Provider photos and names display when the API supplies `photoUrl`, `providerName`, or `providerPhotoUrl`; existing records retain safe initials/ID fallbacks.
+- **[~]** Legacy development-only equipment screens and registration helper copy still contain alert-based helper messages; production equipment browsing/listing routes use the new in-app flows.
+- **[~]** Final accessibility and small-screen testing still requires emulator/device screenshots and touch-target verification.
+
 ## Full item list
 
 ## Audit status — 2026-11-27
@@ -164,7 +182,7 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Weighted total score
 - **DONE** Handle missing data (no rating, no price, no location) — matching assigns neutral defaults for absent rating, distance, response time, and price values.
 - **DONE** Only approved providers in the matching category — `MatchingService.match` filters approval status, active account, and the request category before scoring.
-- **DONE** Matching pipeline (request, category, providers, ranked list)
+- **DONE** Matching pipeline (request, category, approved active providers, ranked list) — provider statistics are fetched in grouped queries so query count does not grow per candidate.
 - **DONE** Ranking API returns score and per-factor breakdown
 - **DONE** Price-only baseline for comparison — matching now returns `priceOnlyProviderIds` alongside the weighted ranking.
 - **DONE** Track provider response time — response time is calculated from quotation/request timestamps and persisted on the provider record.
@@ -188,12 +206,12 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **PARTIAL** LLM fallback (JSON prompt, category list from database, validation, timeout, one retry)
 - **DONE** Cache and rate limit for LLM calls — [backend/app/services/classification_service.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/services/classification_service.py) caches classifications for five minutes and limits each customer to 60 classifications per hour.
 - **DONE** Remove phone numbers and addresses before the LLM call
-- **DONE** "User picks a category" last fallback — [backend/app/ai/pipeline.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/ai/pipeline.py) returns the `user` layer and the AI result screen routes to manual category selection.
+- **DONE** Manual category fallback and explicit unlisted-service path — customers may let AI choose, select an active category, or submit without one for review. Manual-review submissions bypass automatic category assignment and are saved as unmatched requests.
 - **DONE** AI result screen with "Not right? Change" button — [mobile/src/features/requests/screens/AIResultScreen.tsx](D:/SUSL/SE%20SEM%2005/WadaLinik/mobile/src/features/requests/screens/AIResultScreen.tsx) is registered in `CustomerNavigator` and uses classification/category/matching API queries.
 - **DONE** Low-confidence screen and "service not available yet" screen — `AIResultScreen` renders both states from the real classification response and provides manual category recovery.
 - **DONE** `classification_log` table and logging every request
 - **DONE** Staging table `llm_labeled_requests` with approval rules
-- **DONE** Admin page to review staged groups
+- **DONE** Admin review page — reviews uncertain model labels and unmatched customer requests; admins can assign an active category or close a request, and the customer is notified. Admin-assigned labels are exported for later manual retraining; registration/review does not retrain the live model.
 - **DONE** `category_proposals` table and provider proposal form — [backend/app/models/ai_review.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/app/models/ai_review.py), the registered `/api/v1/admin/ai/category-proposals` routes, and the provider proposal UI in `ProfileScreen` provide the flow.
 - **PARTIAL** Manual `retrain.py` with versioning and rollback
 - **DONE** Unit tests for the classifier, LLM wrapper and fallbacks — [backend/tests/unit/test_ai_classification.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_ai_classification.py), [backend/tests/unit/test_groq_fallback.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_groq_fallback.py), and [backend/tests/unit/test_ai_resilience.py](D:/SUSL/SE%20SEM%2005/WadaLinik/backend/tests/unit/test_ai_resilience.py) cover model, keyword, LLM validation/retry, PII scrubbing, fallback, and resilience behavior.
@@ -211,9 +229,9 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **DONE** Status field — equipment and reservations have explicit lifecycle status enums, including available, reserved, in-rent, return-pending, returned, and cancelled.
 
 ### Backend
-- **DONE** Add equipment
+- **DONE** Add equipment — listing details (image, delivery fee/radius, tags, pickup and return locations) persist; public browsing hides listings until their provider is approved and active.
 - **DONE** Edit and delete equipment
-- **DONE** List and search equipment (name, category, availability)
+- **DONE** List and search equipment (name, description, category, tags, availability, and price; public results require an approved active provider)
 - **DONE** Reserve equipment with dates
 - **DONE** Date conflict and double-booking check
 - **PARTIAL** Database transaction for every status change — writes are committed, but reservation overlap checks and status transitions are not protected by a concurrency-safe transaction/locking strategy.
@@ -226,9 +244,9 @@ Owners: **[M1]** Pushpakumara | **[M2]** Muthunayaka | **[M3]** Rideemahaliyadda
 - **MISSING** Notification on reservation and return
 
 ### Frontend
-- **DONE** Equipment listing form — provider fleet links to a create/edit form using the HTTP API.
+- **DONE** Equipment listing form — provider fleet links to a create/edit form using the HTTP API and captures listing images, tags, delivery terms, and pickup/return locations.
 - **DONE** My equipment page — the provider Equipment tab loads and searches the owner's fleet.
-- **DONE** Browse and search page — the customer equipment catalog supports name/category filtering.
+- **DONE** Browse and search page — the customer equipment catalog searches listing names, categories, descriptions, and tags, and displays delivery and pickup/return terms.
 - **DONE** Equipment detail page — details and current status are displayed before booking.
 - **DONE** Reservation form — customers select dates and submit a reservation through the API.
 - **DONE** My reservations with status — customer reservations and provider fleet reservations show lifecycle states.

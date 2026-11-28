@@ -28,9 +28,8 @@ interface EquipmentCardProps {
   onCheckIn?: (id: string) => void;
 }
 
-// Fallback placeholder image (data URI for a grey box)
-const PLACEHOLDER =
-  'https://via.placeholder.com/80x80/E5E7EB/9CA3AF?text=IMG';
+// A purposeful local fallback keeps equipment cards useful when a listing has no photo.
+const PLACEHOLDER = require('../../../../assets/rental-equipment.png');
 
 export default function EquipmentCard({
   item,
@@ -51,7 +50,7 @@ export default function EquipmentCard({
         {/* Equipment image */}
         <View style={styles.imageWrapper}>
           <Image
-            source={{ uri: imageUri }}
+            source={typeof imageUri === 'string' ? { uri: imageUri } : imageUri}
             style={styles.image}
             resizeMode="cover"
           />
@@ -72,7 +71,7 @@ export default function EquipmentCard({
           {/* Status badge */}
           <View style={styles.badgeRow}>
             <StatusBadge status={status} size="sm" />
-            {activeRental?.dueTime && (
+            {!!activeRental?.dueTime && (
               <Text style={styles.dueTime}>{activeRental.dueTime}</Text>
             )}
           </View>
@@ -99,7 +98,7 @@ export default function EquipmentCard({
       </View>
 
       {/* ── Context row (renter info / description) ──────────── */}
-      {activeRental?.renterName && (
+      {!!activeRental?.renterName && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>👤</Text>
           <Text style={styles.contextText}>
@@ -107,7 +106,7 @@ export default function EquipmentCard({
             <Text style={styles.contextBold}>{activeRental.renterName}</Text>
             {activeRental.dueTime ? ` · Active until ${activeRental.dueTime} today` : ''}
           </Text>
-          {activeRental.renterPhone && (
+          {!!activeRental.renterPhone && (
             <TouchableOpacity>
               <Text style={styles.callIcon}>📞</Text>
             </TouchableOpacity>
@@ -115,7 +114,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {activeRental?.pickupLocation && status === 'reserved' && (
+      {!!activeRental?.pickupLocation && status === 'reserved' && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>📍</Text>
           <Text style={styles.contextText}>
@@ -124,7 +123,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {status === 'return_pending' && activeRental?.returnLocation && (
+      {status === 'return_pending' && !!activeRental?.returnLocation && (
         <View style={styles.contextRow}>
           <Text style={styles.contextIcon}>📦</Text>
           <Text style={styles.contextText}>
@@ -136,7 +135,7 @@ export default function EquipmentCard({
         </View>
       )}
 
-      {description && !activeRental && (
+      {!!description && !activeRental && (
         <View style={styles.descRow}>
           <Text style={styles.descText} numberOfLines={2}>
             {description}

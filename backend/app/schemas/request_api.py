@@ -14,6 +14,7 @@ def _check_budget_order(budget_min, budget_max) -> None:
 
 class RequestCreate(BaseModel):
     categoryId: int | None = None
+    manualReview: bool = False
     title: str = Field(max_length=200)
     description: str = Field(min_length=3, max_length=10000)
     urgency: UrgencyValue = "medium"
@@ -26,6 +27,8 @@ class RequestCreate(BaseModel):
     @model_validator(mode="after")
     def budget_range_is_valid(self):
         _check_budget_order(self.budgetMin, self.budgetMax)
+        if self.manualReview and self.categoryId is not None:
+            raise ValueError("manualReview requires categoryId to be null")
         return self
 
 

@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeActive: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: colors.primaryContainer,
   },
   badgeText: {
     fontSize: fontSize.xs,

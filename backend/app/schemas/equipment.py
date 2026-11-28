@@ -19,10 +19,10 @@ class ActiveRentalInfo(BaseModel):
 
 # ── Equipment Schemas ─────────────────────────────────────────
 class EquipmentBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=255)
+    name: str = Field(..., min_length=2, max_length=150)
     category: str = Field(..., min_length=2, max_length=100)
     description: Optional[str] = None
-    image_url: Optional[str] = None
+    image_url: Optional[str] = Field(default=None, max_length=2048)
     price_per_day: float = Field(..., gt=0, description="Daily rate in USD or local currency")
     deposit: float = Field(default=0.0, ge=0)
     delivery_fee: float = Field(default=0.0, ge=0)

@@ -55,7 +55,7 @@ export default function ProviderMatchCard({ provider, weights, badges = [], onSe
       </View>
 
       <View style={styles.identity}>
-        <Avatar name={provider.name} verified={provider.verified} />
+        <Avatar uri={provider.photoUrl} name={provider.name} verified={provider.verified} />
         <View style={styles.identityText}>
           <Text variant="headlineSm" numberOfLines={1}>
             {provider.name}

@@ -30,6 +30,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: 'rgba(19, 27, 46, 0.06)',
+    borderColor: colors.borderLight,
   },
 });

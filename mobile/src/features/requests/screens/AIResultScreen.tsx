@@ -45,7 +45,7 @@ function Stat({ icon, label, value }: { icon: IconName; label: string; value: st
 export default function AIResultScreen({ navigation, route }: CustomerStackScreenProps<'AIResult'>) {
   const { requestId } = route.params;
   const insets = useSafeAreaInsets();
-  const classification = useGetClassificationQuery(requestId);
+  const classification = useGetClassificationQuery(requestId, { refetchOnMountOrArgChange: true });
   const categories = useGetCategoriesQuery();
   const resolved = classification.data?.status === 'success' && !!classification.data?.categoryId;
   const matches = useGetMatchesQuery(requestId, { skip: !resolved });
@@ -62,10 +62,17 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
   }
 
   if (classification.isError || !classification.data) {
+    const error = classification.error;
+    const isNetworkError = error != null && 'status' in error && error.status === 'NETWORK';
+    const errorMessage =
+      isNetworkError
+        ? 'Your request was submitted, but the server could not be reached to load its analysis. Check your connection and try again.'
+        : 'Your request was submitted, but its analysis could not be loaded. Try again or choose a category manually.';
+
     return (
       <View style={styles.root}>
         {header}
-        <ErrorState title="Analysis failed" onRetry={() => void classification.refetch()} />
+        <ErrorState title="Analysis failed" message={errorMessage} onRetry={() => void classification.refetch()} />
         <Button label="Choose a category manually" size="lg" variant="outline" onPress={() => navigation.navigate('CreateRequest', { requestId })} />
       </View>
     );
@@ -73,7 +80,9 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
 
   const c = classification.data;
   const unavailable = c.details.reason === 'Service not available yet';
+  const manualReview = !resolved && c.details.reason?.startsWith('Manual review requested') === true;
   const manual = c.layer === 'user' && resolved;
+  const adminReviewed = c.layer === 'admin' && resolved;
   const suggestions = (c.details.categories ?? []).map(name => categories.data?.find(category => category.name === name)).filter(category => category !== undefined).slice(0, 4);
   const providers = matches.data?.providers ?? [];
   const highPriority = c.predictedUrgency === 'high' || c.predictedUrgency === 'emergency';
@@ -92,18 +101,18 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
           <View style={styles.heroTag}>
             <Icon name="auto-awesome" size={16} color={colors.accentDark} />
             <Text variant="labelSm" color={colors.accentDark}>
-              {manual ? 'YOUR SELECTION' : resolved ? 'AI SUGGESTION' : 'YOUR INPUT NEEDED'}
+              {adminReviewed ? 'REVIEWED BY OUR TEAM' : manual ? 'YOUR SELECTION' : resolved ? 'SMART MATCH' : manualReview ? 'SAVED FOR REVIEW' : 'YOUR INPUT NEEDED'}
             </Text>
           </View>
 
           <View style={styles.heroMain}>
             <View style={styles.categoryIcon}>
-              <Icon name={resolved ? categoryIcon(c.categoryName) : unavailable ? 'search-off' : 'help-outline'} size={26} color={colors.accentDark} />
+              <Icon name={resolved ? categoryIcon(c.categoryName) : unavailable || manualReview ? 'search-off' : 'help-outline'} size={26} color={colors.accentDark} />
             </View>
             <View style={styles.heroText}>
-              <Text variant="headlineMd">{resolved ? c.categoryName : unavailable ? 'Service not available yet' : 'Let’s choose a category'}</Text>
+              <Text variant="headlineMd">{resolved ? c.categoryName : manualReview ? 'Request saved for review' : unavailable ? 'Service not available yet' : 'Let’s choose a category'}</Text>
               {resolved ? <Text variant="labelLg" color={colors.secondary}>
-                {manual ? 'Selected by you' : `${Math.round(c.confidence * 100)}% classification confidence`}
+                {adminReviewed ? 'Assigned by our review team' : manual ? 'Selected by you' : `${Math.round(c.confidence * 100)}% classification confidence`}
               </Text> : null}
             </View>
           </View>
@@ -126,13 +135,13 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
 
           {!resolved ? (
             <Text variant="bodyMd" color={colors.textSecondary}>
-              {c.details.reason === 'Service not available yet' ? "We don't have this service yet. You can choose another category or edit your request." : 'We could not confidently identify a service. Choose a category using Not right? Change below.'}
+              {manualReview ? 'We could not match your request to a listed service. It has been saved for our team to review; provider matching will start after a category is assigned.' : c.details.reason === 'Service not available yet' ? "We don't have this service yet. You can choose another category or edit your request." : 'We could not confidently identify a service. Choose a category using Not right? Change below.'}
             </Text>
           ) : null}
-          {resolved && !manual ? <Text variant="bodyMd" color={colors.textSecondary}>Based on your description. Please confirm the category before viewing providers.</Text> : null}
+              {resolved && !manual && !adminReviewed ? <Text variant="bodyMd" color={colors.textSecondary}>We used your description to suggest this. Confirm it before viewing providers.</Text> : null}
         </Card>
 
-        {!resolved && suggestions.length > 0 ? <Card style={styles.hero}>
+        {!resolved && !manualReview && suggestions.length > 0 ? <Card style={styles.hero}>
           <Text variant="headlineSm">Suggested categories</Text>
           <Text variant="bodySm" color={colors.textSecondary}>Tap a suggestion to review and save your choice.</Text>
           {suggestions.map(category => <Button key={category.id} label={category.name} size="lg" variant="outline" fullWidth onPress={() => navigation.navigate('CreateRequest', { requestId, categoryId: category.id })} />)}
@@ -211,19 +220,19 @@ export default function AIResultScreen({ navigation, route }: CustomerStackScree
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button
-          label={resolved ? continueLabel : 'Choose a category'}
+          label={resolved ? continueLabel : manualReview ? 'Edit request' : 'Choose a category'}
           size="lg"
           fullWidth
           trailingIcon="arrow-forward"
           onPress={() => resolved ? navigation.navigate('MatchingProviders', { requestId }) : navigation.navigate('CreateRequest', { requestId })}
         />
         <Button
-          label="Not right? Change"
+          label={manualReview ? 'Back' : 'Not right? Change'}
           variant="ghost"
           size="lg"
           icon="tune"
           fullWidth
-          onPress={() => navigation.navigate('CreateRequest', { requestId })}
+          onPress={() => manualReview ? navigation.goBack() : navigation.navigate('CreateRequest', { requestId })}
         />
       </View>
     </View>

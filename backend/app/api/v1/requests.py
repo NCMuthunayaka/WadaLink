@@ -47,7 +47,9 @@ def create_request(
     db.commit()
     db.refresh(request)
     try:
-        ClassificationService.classify_request(db, request)
+        ClassificationService.classify_request(
+            db, request, require_manual_review=payload.manualReview
+        )
     except Exception:
         # Request was committed above; optional AI must not undo it.
         db.rollback()

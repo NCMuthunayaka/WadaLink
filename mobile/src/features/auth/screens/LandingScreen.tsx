@@ -9,9 +9,9 @@ import type { AuthStackParamList } from '@/navigation/types';
 import AuthActions from '../components/AuthActions';
 
 const benefits: { icon: IconName; title: string; color: string }[] = [
-  { icon: 'auto-awesome', title: 'Smart matching', color: '#00A9B7' },
-  { icon: 'verified-user', title: 'Trusted providers', color: '#087E72' },
-  { icon: 'handyman', title: 'Rent equipment', color: '#2459C5' },
+  { icon: 'auto-awesome', title: 'Smart matching', color: colors.accent },
+  { icon: 'verified-user', title: 'Trusted providers', color: colors.secondary },
+  { icon: 'handyman', title: 'Rent equipment', color: colors.primary },
 ];
 
 export default function LandingScreen({ navigation }: NativeStackScreenProps<AuthStackParamList, 'Landing'>) {
@@ -32,7 +32,7 @@ export default function LandingScreen({ navigation }: NativeStackScreenProps<Aut
       </View>
 
       <View style={styles.imageWrap}>
-        <Image source={require('../../../../assets/wedalink-hero.png')} style={styles.heroImage} resizeMode="cover" />
+        <Image source={require('../../../../assets/service-visit.png')} style={styles.heroImage} resizeMode="cover" />
         <View style={styles.imageBadge}><Icon name="verified" size={16} color={colors.secondary} /><Text variant="labelSm" color={colors.secondary}>TRUSTED CONNECTIONS</Text></View>
       </View>
 
@@ -40,8 +40,11 @@ export default function LandingScreen({ navigation }: NativeStackScreenProps<Aut
 
       <View style={styles.actionCard}>
         <Text variant="headlineSm" style={styles.actionTitle}>Ready to get started?</Text>
-        <Text variant="bodySm" color={colors.textMuted} style={styles.actionSubtitle}>Already have an account? Log in to continue. New to WedaLink? Register above.</Text>
-        <Button label="Log in" size="lg" variant="secondary" fullWidth onPress={() => navigation.navigate('Login')} />
+        <Text variant="bodySm" color={colors.textMuted} style={styles.actionSubtitle}>Choose the path that fits you.</Text>
+        <View style={styles.entryRow}>
+          <Button label="I need a service" icon="search" size="lg" variant="secondary" onPress={() => navigation.navigate('Login', { role: 'customer' })} />
+          <Button label="I provide services" icon="handyman" size="lg" variant="outline" onPress={() => navigation.navigate('Login', { role: 'provider' })} />
+        </View>
       </View>
 
       <Text variant="bodySm" color={colors.textMuted} style={styles.footerText}>Choose whether you need a service or provide one after entering the app.</Text>
@@ -57,18 +60,19 @@ const styles = StyleSheet.create({
   logo: { width: 36, height: 36, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   heroCopy: { marginBottom: spacing.lg },
   eyebrow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
-  eyebrowDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#00A9B7' },
-  title: { maxWidth: 330, fontSize: 40, lineHeight: 46, color: '#112B4A', letterSpacing: -0.7 },
+  eyebrowDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.accent },
+  title: { maxWidth: 330, fontSize: 40, lineHeight: 46, color: colors.textPrimary, letterSpacing: -0.7 },
   subtitle: { maxWidth: 350, marginTop: spacing.md, lineHeight: 23 },
-  imageWrap: { height: 265, borderRadius: radius.xl, overflow: 'hidden', backgroundColor: '#DDF4F5', ...shadow.md, position: 'relative' },
+  imageWrap: { height: 265, borderRadius: radius.xl, overflow: 'hidden', backgroundColor: colors.secondaryContainer, ...shadow.md, position: 'relative' },
   heroImage: { width: '100%', height: '100%' },
-  imageBadge: { position: 'absolute', left: spacing.md, bottom: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.94)', borderRadius: 18, paddingHorizontal: spacing.sm, paddingVertical: 7 },
+  imageBadge: { position: 'absolute', left: spacing.md, bottom: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, borderRadius: 18, paddingHorizontal: spacing.sm, paddingVertical: 7 },
   benefitRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm, marginVertical: spacing.lg },
   benefit: { flex: 1, alignItems: 'center', gap: 7 },
   benefitIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   benefitText: { textAlign: 'center', lineHeight: 15 },
-  actionCard: { backgroundColor: '#102F4A', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: '#1D4D6A', gap: spacing.md, ...shadow.lg },
-  actionTitle: { color: '#FFFFFF', fontSize: 19 },
-  actionSubtitle: { maxWidth: 280, marginTop: 4, marginBottom: spacing.sm, color: '#C6DCE8', lineHeight: 18 },
+  actionCard: { backgroundColor: colors.dark, borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: colors.borderStrong, gap: spacing.md, ...shadow.lg },
+  actionTitle: { color: colors.textInverse, fontSize: 19 },
+  actionSubtitle: { maxWidth: 280, marginTop: 4, marginBottom: spacing.sm, color: colors.borderStrong, lineHeight: 18 },
+  entryRow: { gap: spacing.sm },
   footerText: { textAlign: 'center', lineHeight: 17, marginTop: spacing.lg, paddingHorizontal: spacing.md },
 });

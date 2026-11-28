@@ -13,6 +13,8 @@ export interface Quotation {
   id: ID;
   requestId: ID;
   providerId: ID;
+  providerName?: string;
+  providerPhotoUrl?: string;
   pricingType: PricingType;
   amount: number; // total for fixed, estimated total for hourly
   hourlyRate?: number;
